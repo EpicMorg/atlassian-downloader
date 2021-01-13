@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 
+
+var appTitle = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; 
+var appStartupDate = DateTime.Now;
 var outputDir = "output";
 var feedUrls =
     new[] {
@@ -29,7 +34,8 @@ var feedUrls =
         "https://my.atlassian.com/download/feeds/current/stash.json"
     };
 
-
+Console.Title = $"{appTitle} {appVersion}";
+Console.WriteLine($"Download started at {appStartupDate}.");
 
 var client = new HttpClient();
 foreach (var feedUrl in feedUrls)
@@ -64,18 +70,22 @@ foreach (var feedUrl in feedUrls)
                 using var outputStream = File.OpenWrite(outputFile);
                 using var request = await client.GetStreamAsync(file.ZipUrl).ConfigureAwait(false);
                 await request.CopyToAsync(outputStream).ConfigureAwait(false);
-                Console.WriteLine($"Downloaded {outputFile}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"File \"{file.ZipUrl}\" downloaded to \"{outputFile}\".");
+                Console.ResetColor();
             }
             else
             {
-                Console.WriteLine($"File for {file.ZipUrl} already exists");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"[WARN] File \"{outputFile}\" for \"{file.ZipUrl}\" already exists. Skip.");
+                Console.ResetColor();
             }
         }
     }
     Console.WriteLine($"Downloaded all files from " +
         $"{feedUrl}");
 }
-Console.WriteLine("Download complete");
+Console.WriteLine("Download complete.");
 
 
 public partial class ResponseArray
