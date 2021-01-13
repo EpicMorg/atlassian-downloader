@@ -16,13 +16,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Restore dependencies
       run: |
-        cd src
+        cd src/atlassian-downloader
         dotnet restore
     - name: Build
       run:  |
-        cd src
+        cd src/atlassian-downloader
         dotnet build --no-restore
     - name: Test
       run:  |
-        cd src
+        cd src/atlassian-downloader
         dotnet test --no-build --verbosity normal

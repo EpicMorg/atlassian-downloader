@@ -9,14 +9,15 @@
     <Description>Atlassian Downloader by EpicMorg, code by kasthack</Description>
     <PackageProjectUrl>https://github.com/EpicMorg/atlassian-downloader</PackageProjectUrl>
     <PackageIcon>favicon.png</PackageIcon>
-    <FileVersion>1.0.0.2</FileVersion>
+    <FileVersion>1.0.0.4</FileVersion>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/EpicMorg/atlassian-downloader</RepositoryUrl>
     <PackageTags>atlassian, donwloader, epicmorg</PackageTags>
-    <AssemblyVersion>1.0.0.3</AssemblyVersion>
-    <Version>1.0.0.3</Version>
-    <Copyright>EpicMorg 20201</Copyright>
+    <AssemblyVersion>1.0.0.4</AssemblyVersion>
+    <Version>1.0.0.4</Version>
+    <Copyright>EpicMorg 2021</Copyright>
     <Product>Atlassian Downloader</Product>
+	<IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
