@@ -4,6 +4,10 @@
 
 Simple script written with `c#` and `dotnet5` for downloadind all avalible products from `Atlassian`. Why not?
 
+## Authors
+* [@kasthack](https://github.com/kasthack) - core code
+* [@stam](https://github.com/stamepicmorg) - edits
+
 ## Requerments
 1. Preinstalled `dotnet5`. Download [here](https://dotnet.microsoft.com/download/dotnet/5.0).
 2. Supported OS: `win32` or `win64`, `linux`, `macosx`
