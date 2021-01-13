@@ -4,17 +4,19 @@
 
 Simple script written with `c#` and `dotnet5` for downloadind all avalible products from `Atlassian`. Why not?
 
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/8fc9c772e9518a1cb23246ee8cc4cb8a58d9ff22/.github/screenshot-1.png)
+
 ## Authors
 * [@kasthack](https://github.com/kasthack) - core code
 * [@stam](https://github.com/stamepicmorg) - edits
 
 ## Requerments
 1. Preinstalled `dotnet5`. Download [here](https://dotnet.microsoft.com/download/dotnet/5.0).
-2. Supported OS: `win32` or `win64`, `linux`, `macosx`
+2. Supported OS: `win32`, `win64`, `linux`, `macosx`
 
 ## How to
 1. `git clone` this repo.
-2. `cd` to `repo/src`.
+2. `cd` to `<repo>/src`.
 3. execute `donten run` in `src` folder.
 4. all data will be downloaded to `src/output` folder and subfolders
 
