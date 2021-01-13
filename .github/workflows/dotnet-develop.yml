@@ -1,0 +1,31 @@
+name: develop
+
+on:
+  pull_request:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  push:
+    branches:
+      - 'develop'
+
+jobs:
+  build:
+
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Restore dependencies
+      run: |
+        cd src
+        dotnet restore
+    - name: Build
+      run:  |
+        cd src
+        dotnet build --no-restore
+    - name: Test
+      run:  |
+        cd src
+        dotnet test --no-build --verbosity normal

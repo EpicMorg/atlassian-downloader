@@ -1,0 +1,28 @@
+name: master
+
+on:
+  push:
+    branches:
+      - 'master'
+  schedule:
+    - cron:  '00 00 * * 6' # At 12:00 AM, only on Saturday
+
+jobs:
+  build:
+
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Restore dependencies
+      run: |
+        cd src
+        dotnet restore
+    - name: Build
+      run:  |
+        cd src
+        dotnet build --no-restore
+    - name: Test
+      run:  |
+        cd src
+        dotnet test --no-build --verbosity normal
