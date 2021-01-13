@@ -12,7 +12,7 @@ var appBuildType = "[Release]";
     appBuildType = "[Debug]";
 #endif
 
-var outputDir = "output";
+var outputDir = "atlassian";
 var feedUrls =
     new[] {
         "https://my.atlassian.com/download/feeds/archived/bamboo.json",
