@@ -1,14 +1,17 @@
 ﻿using System;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 
-
 var appTitle = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
 var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version; 
 var appStartupDate = DateTime.Now;
+var appBuildType = "[Release]";
+#if DEBUG
+    appBuildType = "[Debug]";
+#endif
+
 var outputDir = "output";
 var feedUrls =
     new[] {
@@ -34,7 +37,7 @@ var feedUrls =
         "https://my.atlassian.com/download/feeds/current/stash.json"
     };
 
-Console.Title = $"{appTitle} {appVersion}";
+Console.Title = $"{appTitle} {appVersion} {appBuildType}";
 Console.WriteLine($"Download started at {appStartupDate}.");
 
 var client = new HttpClient();
@@ -71,22 +74,20 @@ foreach (var feedUrl in feedUrls)
                 using var request = await client.GetStreamAsync(file.ZipUrl).ConfigureAwait(false);
                 await request.CopyToAsync(outputStream).ConfigureAwait(false);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"File \"{file.ZipUrl}\" downloaded to \"{outputFile}\".");
+                Console.WriteLine($"[INFO] File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
                 Console.ResetColor();
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"[WARN] File \"{outputFile}\" for \"{file.ZipUrl}\" already exists. Skip.");
+                Console.WriteLine($"[WARN] File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
                 Console.ResetColor();
             }
         }
     }
-    Console.WriteLine($"Downloaded all files from " +
-        $"{feedUrl}");
+    Console.WriteLine($"[SUCCESS] All files from \"{feedUrl}\" successfully downloaded.");
 }
-Console.WriteLine("Download complete.");
-
+Console.WriteLine($"Download complete at {appStartupDate}.");
 
 public partial class ResponseArray
 {

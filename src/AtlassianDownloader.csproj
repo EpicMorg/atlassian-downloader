@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
-    <PackageId>Atlassian Downloader</PackageId>
+    <PackageId>EpicMorg.Atlassian.Downloader</PackageId>
     <Authors>Atlassian Downloader</Authors>
     <Description>Atlassian Downloader by EpicMorg, code by kasthack</Description>
     <PackageProjectUrl>https://github.com/EpicMorg/atlassian-downloader</PackageProjectUrl>
@@ -13,9 +13,10 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/EpicMorg/atlassian-downloader</RepositoryUrl>
     <PackageTags>atlassian, donwloader, epicmorg</PackageTags>
-    <AssemblyVersion>1.0.0.2</AssemblyVersion>
-    <Version>1.0.0.2</Version>
+    <AssemblyVersion>1.0.0.3</AssemblyVersion>
+    <Version>1.0.0.3</Version>
     <Copyright>EpicMorg 20201</Copyright>
+    <Product>Atlassian Downloader</Product>
   </PropertyGroup>
 
   <ItemGroup>
