@@ -67,3 +67,5 @@ wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/b
 wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/confluence.json
 wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/jira.json
 wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json
+wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/stash.json
+

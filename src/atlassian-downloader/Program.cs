@@ -71,6 +71,7 @@ namespace EpicMorg.Atlassian.Downloader {
                 ? arguments.customFeed.Select(a => a.ToString()).ToArray()
                 : new[] {
         "https://my.atlassian.com/download/feeds/archived/bamboo.json",
+		"https://my.atlassian.com/download/feeds/archived/clover.json",
         "https://my.atlassian.com/download/feeds/archived/confluence.json",
         "https://my.atlassian.com/download/feeds/archived/crowd.json",
         "https://my.atlassian.com/download/feeds/archived/crucible.json",
@@ -82,6 +83,7 @@ namespace EpicMorg.Atlassian.Downloader {
         "https://my.atlassian.com/download/feeds/archived/stash.json",
 
         "https://my.atlassian.com/download/feeds/current/bamboo.json",
+		"https://my.atlassian.com/download/feeds/current/clover.json",
         "https://my.atlassian.com/download/feeds/current/confluence.json",
         "https://my.atlassian.com/download/feeds/current/crowd.json",
         "https://my.atlassian.com/download/feeds/current/crucible.json",
@@ -94,7 +96,8 @@ namespace EpicMorg.Atlassian.Downloader {
         "https://my.atlassian.com/download/feeds/eap/bamboo.json",
         "https://my.atlassian.com/download/feeds/eap/confluence.json",
         "https://my.atlassian.com/download/feeds/eap/jira.json",
-        "https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json"
+        "https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json",
+		"https://my.atlassian.com/download/feeds/eap/stash.json"
                 };
 
             Console.Title = $"{appTitle} {appVersion} {appBuildType}";
