@@ -1,6 +1,6 @@
 # Atlassian Downloader - Changelog
 
-* `1.0.0.6` - added supoprt of `clover`. fixed broken json parsing. added new logger.
+* `1.0.0.6` - added support  of `clover`. fixed broken json parsing. added new logger.
 * `1.0.0.5` - added support for `EAP` releases.
 * `1.0.0.4` - bump version. rewrited build scripts. added support of `arm` and `arm64`.
 * `1.0.0.3` - some cosmetics improvements.
