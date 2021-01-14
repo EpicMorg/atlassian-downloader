@@ -1,20 +1,26 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
-/*
- -o, --output-folder "path" --> set output folder
--v, --version --> show version
--h, --help --> show help
--l, --list, --links --> show all links to output
--f, -feed, --feed-url, -u, --url --> use json link
-*/
-
 namespace EpicMorg.Atlassian.Downloader {
-    class Program {
+    class Program : IHostedService {
+
+        private readonly ILogger<Program> logger;
+        private readonly Arguments arguments;
+
+        public Program(ILogger<Program> logger,Arguments arguments) {
+            this.logger = logger;
+            this.arguments = arguments;
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -22,8 +28,35 @@ namespace EpicMorg.Atlassian.Downloader {
         /// <param name="list">Show all download links from feed without downloading</param>
         /// <param name="customFeed">Override URIs to import.</param>
         /// <returns></returns>
-        static async Task Main(string outputDir = "atlassian", bool list = false, Uri[] customFeed=null) {
-            
+        static async Task Main(string outputDir = "atlassian", bool list = false, Uri[] customFeed = null) => await
+            Host
+                .CreateDefaultBuilder()
+                .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables())
+                .ConfigureAppConfiguration((ctx, configuration) => {
+                    configuration
+                        .SetBasePath(Environment.CurrentDirectory)
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables();
+                })
+                .ConfigureServices((ctx, services) => {
+                    services
+                   .AddOptions()
+                   .AddLogging(builder => {
+                       Log.Logger = new LoggerConfiguration()
+                               .ReadFrom.Configuration(ctx.Configuration)
+                               .CreateLogger();
+                       builder.AddSerilog(dispose: true);
+                   });
+                    services.AddHostedService<Program>();
+                    services.AddSingleton(new Arguments(outputDir, list, customFeed));
+                })
+                .RunConsoleAsync();
+
+        public record Arguments(string outputDir = "atlassian", bool list = false, Uri[] customFeed = null);
+
+        public async Task StartAsync(CancellationToken cancellationToken) {
+
             var appTitle = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
             var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             var appStartupDate = DateTime.Now;
@@ -31,9 +64,9 @@ namespace EpicMorg.Atlassian.Downloader {
 #if DEBUG
             appBuildType = "[Debug]";
 #endif
-             
-            var feedUrls = customFeed != null
-                ? customFeed.Select(a=>a.ToString()).ToArray()
+
+            var feedUrls = arguments.customFeed != null
+                ? arguments.customFeed.Select(a => a.ToString()).ToArray()
                 : new[] {
         "https://my.atlassian.com/download/feeds/archived/bamboo.json",
         "https://my.atlassian.com/download/feeds/archived/confluence.json",
@@ -63,12 +96,12 @@ namespace EpicMorg.Atlassian.Downloader {
                 };
 
             Console.Title = $"{appTitle} {appVersion} {appBuildType}";
-            Console.WriteLine($"Task started at {appStartupDate}.");
+            logger.LogInformation($"Task started at {appStartupDate}.");
 
             var client = new HttpClient();
 
             foreach (var feedUrl in feedUrls) {
-                var feedDir = Path.Combine(outputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
+                var feedDir = Path.Combine(arguments.outputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
                 var atlassianJson = await client.GetStringAsync(feedUrl);
                 var callString = "downloads(";
                 var json = atlassianJson[callString.Length..^1];
@@ -76,14 +109,14 @@ namespace EpicMorg.Atlassian.Downloader {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 });
                 var versionsProg = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
-                if (list) {
+                if (arguments.list) {
                     foreach (var versionProg in versionsProg) {
                         foreach (var file in versionProg.Value) {
                             Console.WriteLine(file.ZipUrl);
                         }
                     }
                 } else {
-                    Console.WriteLine($"[INFO] Download from JSON \"{feedUrl}\" started at {appStartupDate}.");
+                    logger.LogInformation($"Download from JSON \"{feedUrl}\" started at {appStartupDate}.");
                     foreach (var versionProg in versionsProg) {
                         var directory = Path.Combine(feedDir, versionProg.Key);
                         if (!Directory.Exists(directory)) {
@@ -100,22 +133,27 @@ namespace EpicMorg.Atlassian.Downloader {
                                 using var outputStream = File.OpenWrite(outputFile);
                                 using var request = await client.GetStreamAsync(file.ZipUrl).ConfigureAwait(false);
                                 await request.CopyToAsync(outputStream).ConfigureAwait(false);
-                                Console.ForegroundColor = ConsoleColor.Green;
-                                Console.WriteLine($"[INFO] File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
-                                Console.ResetColor();
+                                //Console.ForegroundColor = ConsoleColor.Green;
+                                logger.LogInformation($"File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
+                                // Console.ResetColor();
                             } else {
-                                Console.ForegroundColor = ConsoleColor.Yellow;
-                                Console.WriteLine($"[WARN] File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
-                                Console.ResetColor();
+                                // Console.ForegroundColor = ConsoleColor.Yellow;
+                                logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
+                                //  Console.ResetColor();
                             }
                         }
                     }
-                    Console.WriteLine($"[SUCCESS] All files from \"{feedUrl}\" successfully downloaded.");
+                    logger.LogCritical($"All files from \"{feedUrl}\" successfully downloaded.");
                 }
             }
 
-            Console.WriteLine($"Download complete at {appStartupDate}.");
+            logger.LogCritical($"Download complete at {appStartupDate}.");
 
+        }
+
+
+        public Task StopAsync(CancellationToken cancellationToken) {
+            throw new NotImplementedException();
         }
     }
 
