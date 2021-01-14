@@ -4,7 +4,7 @@
 
 Console app written with `c#` and `dotnet5` for downloading all avalible products from `Atlassian`. Why not?
 
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/8fc9c772e9518a1cb23246ee8cc4cb8a58d9ff22/.github/screenshot-1.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/8fd59dfb0514aeff8556761c2f9862185d3489ea/.github/screenshot-1.png)
 
 ## Requerments
 1. Preinstalled `dotnet5`. Download [here](https://dotnet.microsoft.com/download/dotnet/5.0).
