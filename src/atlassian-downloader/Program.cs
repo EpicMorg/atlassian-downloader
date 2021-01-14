@@ -34,7 +34,12 @@ var feedUrls =
         "https://my.atlassian.com/download/feeds/current/jira-core.json",
         "https://my.atlassian.com/download/feeds/current/jira-servicedesk.json",
         "https://my.atlassian.com/download/feeds/current/jira-software.json",
-        "https://my.atlassian.com/download/feeds/current/stash.json"
+        "https://my.atlassian.com/download/feeds/current/stash.json",
+		
+		"https://my.atlassian.com/download/feeds/eap/bamboo.json",
+		"https://my.atlassian.com/download/feeds/eap/confluence.json",
+		"https://my.atlassian.com/download/feeds/eap/jira.json",
+		"https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json"
     };
 
 Console.Title = $"{appTitle} {appVersion} {appBuildType}";
