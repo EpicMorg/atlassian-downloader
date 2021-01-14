@@ -15,12 +15,15 @@ using System.Threading.Tasks;
 
 namespace EpicMorg.Atlassian.Downloader {
     class Program {
-
-        /// <param name="intOption">An option whose argument is parsed as an int</param>
-        /// <param name="boolOption">An option whose argument is parsed as a bool</param>
-        /// <param name="fileOption">An option whose argument is parsed as a FileInfo</param>
-        static async Task Main(string[] args) {
-           
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="outputDir">Override output directory to download</param>
+        /// <param name="list">Show all download links from feed without downloading</param>
+        /// <param name="customFeed">Override URIs to import.</param>
+        /// <returns></returns>
+        static async Task Main(string outputDir = "atlassian", bool list = false, Uri[] customFeed=null) {
+            
             var appTitle = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
             var appVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
             var appStartupDate = DateTime.Now;
@@ -28,10 +31,10 @@ namespace EpicMorg.Atlassian.Downloader {
 #if DEBUG
             appBuildType = "[Debug]";
 #endif
-
-            var outputDir = "atlassian";
-            var feedUrls =
-                new[] {
+             
+            var feedUrls = customFeed != null
+                ? customFeed.Select(a=>a.ToString()).ToArray()
+                : new[] {
         "https://my.atlassian.com/download/feeds/archived/bamboo.json",
         "https://my.atlassian.com/download/feeds/archived/confluence.json",
         "https://my.atlassian.com/download/feeds/archived/crowd.json",
@@ -60,9 +63,10 @@ namespace EpicMorg.Atlassian.Downloader {
                 };
 
             Console.Title = $"{appTitle} {appVersion} {appBuildType}";
-            Console.WriteLine($"Download started at {appStartupDate}.");
+            Console.WriteLine($"Task started at {appStartupDate}.");
 
             var client = new HttpClient();
+
             foreach (var feedUrl in feedUrls) {
                 var feedDir = Path.Combine(outputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
                 var atlassianJson = await client.GetStringAsync(feedUrl);
@@ -71,37 +75,47 @@ namespace EpicMorg.Atlassian.Downloader {
                 var parsed = JsonSerializer.Deserialize<ResponseArray[]>(json, new JsonSerializerOptions {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 });
-                var versions = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
-
-                foreach (var version in versions) {
-                    var directory = Path.Combine(feedDir, version.Key);
-                    if (!Directory.Exists(directory)) {
-                        Directory.CreateDirectory(directory);
-                    }
-                    foreach (var file in version.Value) {
-                        if (file.ZipUrl == null) { continue; }
-                        var serverPath = file.ZipUrl.PathAndQuery;
-                        var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf("/") + 1)..]);
-                        if (!File.Exists(outputFile)) {
-                            if (!string.IsNullOrEmpty(file.Md5)) {
-                                File.WriteAllText(outputFile + ".md5", file.Md5);
-                            }
-                            using var outputStream = File.OpenWrite(outputFile);
-                            using var request = await client.GetStreamAsync(file.ZipUrl).ConfigureAwait(false);
-                            await request.CopyToAsync(outputStream).ConfigureAwait(false);
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.WriteLine($"[INFO] File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
-                            Console.ResetColor();
-                        } else {
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine($"[WARN] File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
-                            Console.ResetColor();
+                var versionsProg = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
+                if (list) {
+                    foreach (var versionProg in versionsProg) {
+                        foreach (var file in versionProg.Value) {
+                            Console.WriteLine(file.ZipUrl);
                         }
                     }
+                } else {
+                    Console.WriteLine($"[INFO] Download from JSON \"{feedUrl}\" started at {appStartupDate}.");
+                    foreach (var versionProg in versionsProg) {
+                        var directory = Path.Combine(feedDir, versionProg.Key);
+                        if (!Directory.Exists(directory)) {
+                            Directory.CreateDirectory(directory);
+                        }
+                        foreach (var file in versionProg.Value) {
+                            if (file.ZipUrl == null) { continue; }
+                            var serverPath = file.ZipUrl.PathAndQuery;
+                            var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf("/") + 1)..]);
+                            if (!File.Exists(outputFile)) {
+                                if (!string.IsNullOrEmpty(file.Md5)) {
+                                    File.WriteAllText(outputFile + ".md5", file.Md5);
+                                }
+                                using var outputStream = File.OpenWrite(outputFile);
+                                using var request = await client.GetStreamAsync(file.ZipUrl).ConfigureAwait(false);
+                                await request.CopyToAsync(outputStream).ConfigureAwait(false);
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine($"[INFO] File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
+                                Console.ResetColor();
+                            } else {
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine($"[WARN] File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
+                                Console.ResetColor();
+                            }
+                        }
+                    }
+                    Console.WriteLine($"[SUCCESS] All files from \"{feedUrl}\" successfully downloaded.");
                 }
-                Console.WriteLine($"[SUCCESS] All files from \"{feedUrl}\" successfully downloaded.");
             }
+
             Console.WriteLine($"Download complete at {appStartupDate}.");
+
         }
     }
 
