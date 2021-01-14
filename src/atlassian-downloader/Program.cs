@@ -40,9 +40,11 @@ namespace EpicMorg.Atlassian.Downloader {
                         .AddEnvironmentVariables();
                 })
                 .ConfigureServices((ctx, services) => {
+                  
                     services
                    .AddOptions()
                    .AddLogging(builder => {
+                       builder.ClearProviders();
                        Log.Logger = new LoggerConfiguration()
                                .ReadFrom.Configuration(ctx.Configuration)
                                .CreateLogger();
@@ -96,7 +98,7 @@ namespace EpicMorg.Atlassian.Downloader {
                 };
 
             Console.Title = $"{appTitle} {appVersion} {appBuildType}";
-            logger.LogInformation($"Task started at {appStartupDate}.");
+            logger.LogTrace($"Task started at {appStartupDate}.");
 
             var client = new HttpClient();
 
@@ -143,11 +145,11 @@ namespace EpicMorg.Atlassian.Downloader {
                             }
                         }
                     }
-                    logger.LogCritical($"All files from \"{feedUrl}\" successfully downloaded.");
+                    logger.LogTrace($"All files from \"{feedUrl}\" successfully downloaded.");
                 }
             }
 
-            logger.LogCritical($"Download complete at {appStartupDate}.");
+            logger.LogTrace($"Download complete at {appStartupDate}.");
 
         }
 
