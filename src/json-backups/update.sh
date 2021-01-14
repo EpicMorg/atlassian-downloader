@@ -1,6 +1,6 @@
 #!/bin/bash
-rm -rfv $PWD/current $PWD/archived
-mkdir -p $PWD/current $PWD/archived
+rm -rfv $PWD/current $PWD/archived $PWD/eap
+mkdir -p $PWD/current $PWD/archived $PWD/eap
 
 ###################################################################################################
 # Current links
@@ -59,3 +59,11 @@ wget -c --random-wait -P $PWD/archived/ https://my.atlassian.com/download/feeds/
 wget -c --random-wait -P $PWD/archived/ https://my.atlassian.com/download/feeds/archived/jira-software.json
 wget -c --random-wait -P $PWD/archived/ https://my.atlassian.com/download/feeds/archived/jira-servicedesk.json
 
+
+###################################################################################################
+# EAP links
+###################################################################################################
+wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/bamboo.json
+wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/confluence.json
+wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/jira.json
+wget -c --random-wait -P $PWD/eap/ https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json

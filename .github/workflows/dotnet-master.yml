@@ -14,15 +14,27 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Restore dependencies
+
+    - name: Restore
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       run: |
         cd src/atlassian-downloader
         dotnet restore
+
     - name: Build
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       run:  |
         cd src/atlassian-downloader
         dotnet build --no-restore
+
     - name: Test
+      env:
+        DOTNET_CLI_TELEMETRY_OPTOUT: true
+        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
       run:  |
         cd src/atlassian-downloader
         dotnet test --no-build --verbosity normal
