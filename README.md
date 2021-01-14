@@ -14,7 +14,21 @@ Console app written with `c#` and `dotnet5` for downloading all avalible product
 1. `git clone` this repo.
 2. `cd` to `<repo>/src`.
 3. execute `donten run` in `src` folder.
-4. by default all data will be downloaded to `src/atlassian` folder and subfolders. see `--help` for run arguments and overrides.
+4. by default all data will be downloaded to `src/atlassian` folder and subfolders.
+
+## Usage
+
+```
+Usage:
+  atlassian-downloader [options]
+
+Options:
+  --output-dir <output-dir>      Override output directory to download [default: atlassian]
+  --list                         Show all download links from feed without downloading [default: False]
+  --custom-feed <custom-feed>    Override URIs to import. [default: ]
+  --version                      Show version information
+  -?, -h, --help                 Show help and usage information
+```
 
 ## Supported products:
 
