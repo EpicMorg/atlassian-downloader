@@ -2,7 +2,7 @@
 
 # Atlassian Downloader
 
-Simple script written with `c#` and `dotnet5` for downloadind all avalible products from `Atlassian`. Why not?
+Simple script written with `c#` and `dotnet5` for downloading all avalible products from `Atlassian`. Why not?
 
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/8fc9c772e9518a1cb23246ee8cc4cb8a58d9ff22/.github/screenshot-1.png)
 
@@ -75,3 +75,16 @@ Simple script written with `c#` and `dotnet5` for downloadind all avalible produ
 * https://my.atlassian.com/download/feeds/archived/jira-core.json
 * https://my.atlassian.com/download/feeds/archived/jira-software.json
 * https://my.atlassian.com/download/feeds/archived/jira-servicedesk.json
+
+
+### EAP links
+
+#### Bamboo
+* https://my.atlassian.com/download/feeds/eap/bamboo.json
+
+#### Confluence
+* https://my.atlassian.com/download/feeds/eap/confluence.json
+
+#### Jira
+* https://my.atlassian.com/download/feeds/eap/jira.json
+* https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json
