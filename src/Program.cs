@@ -24,11 +24,13 @@ namespace EpicMorg.Atlassian.Downloader {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="outputDir">Override output directory to download</param>
-        /// <param name="list">Show all download links from feed without downloading</param>
+        /// <param name="OutputDir">Override output directory to download.</param>
+        /// <param name="ListURL">Show all download links from feed(s) without downloading.</param>
+        /// <param name="ListVersions">Show all versions from feed(s) without downloading.</param>
+        /// <param name="ShowRawJson">Show raw json content from feed(s) downloading.</param>
         /// <param name="customFeed">Override URIs to import.</param>
         /// <returns></returns>
-        static async Task Main(string outputDir = "atlassian", bool list = false, Uri[] customFeed = null) => await
+        static async Task Main(string OutputDir = "atlassian", bool ListURL = false, bool ListVersions = false, Uri[] customFeed = null, bool ShowRawJson = false) => await
             Host
                 .CreateDefaultBuilder()
                 .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables())
@@ -51,11 +53,11 @@ namespace EpicMorg.Atlassian.Downloader {
                        builder.AddSerilog(dispose: true);
                    });
                     services.AddHostedService<Program>();
-                    services.AddSingleton(new Arguments(outputDir, list, customFeed));
+                    services.AddSingleton(new Arguments(OutputDir, ListURL, ListVersions, customFeed, ShowRawJson));
                 })
                 .RunConsoleAsync();
 
-        public record Arguments(string outputDir = "atlassian", bool list = false, Uri[] customFeed = null);
+        public record Arguments(string OutputDir = "atlassian", bool ListURL = false, bool ListVersions = false, Uri[] CustomFeed = null, bool ShowRawJson = false);
 
         public async Task StartAsync(CancellationToken cancellationToken) {
 
@@ -67,8 +69,8 @@ namespace EpicMorg.Atlassian.Downloader {
             appBuildType = "[Debug]";
 #endif
 
-            var feedUrls = arguments.customFeed != null
-                ? arguments.customFeed.Select(a => a.ToString()).ToArray()
+            var feedUrls = arguments.CustomFeed != null
+                ? arguments.CustomFeed.Select(a => a.ToString()).ToArray()
                 : new[] {
         "https://my.atlassian.com/download/feeds/archived/bamboo.json",
 		"https://my.atlassian.com/download/feeds/archived/clover.json",
@@ -106,7 +108,7 @@ namespace EpicMorg.Atlassian.Downloader {
             var client = new HttpClient();
 
             foreach (var feedUrl in feedUrls) {
-                var feedDir = Path.Combine(arguments.outputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
+                var feedDir = Path.Combine(arguments.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
                 var atlassianJson = await client.GetStringAsync(feedUrl);
                 var callString = "downloads(";
                 var json = atlassianJson[callString.Length..^1];
@@ -114,7 +116,28 @@ namespace EpicMorg.Atlassian.Downloader {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 });
                 var versionsProg = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
-                if (arguments.list) {
+                if (arguments.ShowRawJson)
+                {
+                    Console.WriteLine("Not released yet.");
+                    return;
+                    //foreach (var versionProg in versionsProg)
+                    //{
+                    //    foreach (var file in versionProg.Value)
+                    //    {
+                    //        
+                    //    }
+                    //}
+                }
+                else if (arguments.ListVersions)
+                {
+                    foreach (var versionProg in versionsProg)
+                    {
+                        foreach (var file in versionProg.Value)
+                        {
+                            Console.WriteLine(file.Version);
+                        }
+                    }
+                }  else if (arguments.ListURL) {
                     foreach (var versionProg in versionsProg) {
                         foreach (var file in versionProg.Value) {
                             Console.WriteLine(file.ZipUrl);
@@ -153,7 +176,6 @@ namespace EpicMorg.Atlassian.Downloader {
             }
 
             logger.LogTrace($"Download complete at {appStartupDate}.");
-
         }
 
 
