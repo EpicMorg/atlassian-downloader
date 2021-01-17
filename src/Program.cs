@@ -15,9 +15,9 @@ namespace EpicMorg.Atlassian.Downloader
         /// <summary>
         /// Atlassian archive downloader. See https://github.com/EpicMorg/atlassian-downloader for more info
         /// </summary>
+        /// <param name="Action">Action to perform</param>
         /// <param name="OutputDir">Override output directory to download.</param>
         /// <param name="customFeed">Override URIs to import.</param>
-        /// <param name="Action">Action to perform</param>
         static async Task Main(string OutputDir = "atlassian", Uri[] customFeed = null, DownloadAction Action = DownloadAction.Download) => await
             Host
                 .CreateDefaultBuilder()

@@ -32,7 +32,7 @@ namespace EpicMorg.Atlassian.Downloader
             this.SetConsoleTitle();
             var feedUrls = this.GetFeedUrls();
 
-            logger.LogTrace($"Task started");
+            logger.LogInformation($"Task started");
             foreach (var feedUrl in feedUrls)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -116,7 +116,14 @@ namespace EpicMorg.Atlassian.Downloader
                 "https://my.atlassian.com/download/feeds/eap/confluence.json",
                 "https://my.atlassian.com/download/feeds/eap/jira.json",
                 "https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json",
-                "https://my.atlassian.com/download/feeds/eap/stash.json"
+                "https://my.atlassian.com/download/feeds/eap/stash.json",
+				
+				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json
+				"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json",
+				
+				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json
+				"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json"
+				
             };
 
         private void SetConsoleTitle()
@@ -168,7 +175,7 @@ namespace EpicMorg.Atlassian.Downloader
                     }
                 }
             }
-            logger.LogTrace($"All files from \"{feedUrl}\" successfully downloaded.");
+            logger.LogInformation($"All files from \"{feedUrl}\" successfully downloaded.");
         }
 
         private async Task DownloadFile(ResponseItem file, string outputFile, CancellationToken cancellationToken)
