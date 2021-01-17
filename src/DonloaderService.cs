@@ -76,10 +76,10 @@ namespace EpicMorg.Atlassian.Downloader
         private async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetJson(string feedUrl, CancellationToken cancellationToken)
         {
             var atlassianJson = await client.GetStringAsync(feedUrl, cancellationToken).ConfigureAwait(false);
-            var json = atlassianJson["downloads(".Length..^1];
+            var json = atlassianJson.Trim()["downloads(".Length..^1];
             var parsed = JsonSerializer.Deserialize<ResponseItem[]>(json, new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
             });
             var versions = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
 
