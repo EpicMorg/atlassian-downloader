@@ -37,12 +37,11 @@ Usage:
   atlassian-downloader [options]
 
 Options:
+  --output-dir <output-dir>                                Override output directory to download [default: atlassian]
+  --custom-feed <custom-feed>                              Override URIs to import [default: ]
   --action <Download|ListURLs|ListVersions|ShowRawJson>    Action to perform [default: Download]
-  --output-dir <output-dir>                                Override output directory to download. [default: atlassian]
-  --custom-feed <custom-feed>                              Override URIs to import. [default: ]
-  --version                                                Show version information
+  --version                                                Show credits banner [default: False]
   -?, -h, --help                                           Show help and usage information
-
 ```
 ## Additional settings
 File `src/appSettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file.
