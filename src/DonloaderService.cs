@@ -112,12 +112,12 @@ namespace EpicMorg.Atlassian.Downloader
                 WriteColorLine("%║                 .:cc;.                                                                    %║");
                 WriteColorLine("%║                .;cccc;.                                                                   %║");
                 WriteColorLine("%║               .;cccccc;.             !╔══════════════════════════════════════════════╗     %║");
-                WriteColorLine("%║               .:ccccccc;.            !║    "+ assemblyName +"                      !║     %║");
+                WriteColorLine("%║               .:ccccccc;.            !║    " + assemblyName + "                      !║     %║");
                 WriteColorLine("%║               'ccccccccc;.           !╠══════════════════════════════════════════════╣     %║");
                 WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kastkack                         !║     %║");
                 WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
                 WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
-                WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: "+ assemblyVersion + "                          !║     %║");
+                WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: " + assemblyVersion + "                          !║     %║");
                 WriteColorLine("%║        .,,,,,'.';cccccccccccc;.      !║    &GitHub:  $EpicMorg/atlassian-downloader    !║     %║");
                 WriteColorLine("%║       .,;;;;;,'.':cccccccccccc;.     !╚══════════════════════════════════════════════╝     %║");
                 WriteColorLine("%║      .;:;;;;;;,...:cccccccccccc;.                                                         %║");
@@ -148,7 +148,7 @@ namespace EpicMorg.Atlassian.Downloader
                             Console.Out.WriteLine(json);
                             break;
                         case DownloadAction.Download:
-                            await this.DownloadFilesFromFreed(feedUrl, versions, cancellationToken).ConfigureAwait(false);
+                            await this.DownloadFilesFromFeed(feedUrl, versions, cancellationToken).ConfigureAwait(false);
                             break;
                         case DownloadAction.ListURLs:
                             foreach (var versionProg in versions)
@@ -172,7 +172,7 @@ namespace EpicMorg.Atlassian.Downloader
                 }
             }
             logger.LogInformation($"Complete");
-            
+
             this.hostApplicationLifetime.StopApplication();
         }
 
@@ -180,12 +180,14 @@ namespace EpicMorg.Atlassian.Downloader
         {
             var atlassianJson = await client.GetStringAsync(feedUrl, cancellationToken).ConfigureAwait(false);
             var json = atlassianJson.Trim()["downloads(".Length..^1];
+            logger.LogTrace("Downloaded json: {0}", json);
             var parsed = JsonSerializer.Deserialize<ResponseItem[]>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+            logger.LogDebug("Found {0} releases", parsed.Length);
             var versions = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
-
+            logger.LogDebug("Found {0} releases", versions.Count);
             return (json, versions);
         }
 
@@ -226,52 +228,56 @@ namespace EpicMorg.Atlassian.Downloader
 				
 				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json
 				"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json"
-				
+
             };
 
-        private  void SetConsoleTitle()
+        private void SetConsoleTitle()
         {
             Console.Title = $@"{assemblyName} {assemblyVersion} {assemblyEnvironment} - {assemblyBuildType}";
         }
 
-        private async Task DownloadFilesFromFreed(string feedUrl, IDictionary<string, ResponseItem[]> versions, CancellationToken cancellationToken)
+        private async Task DownloadFilesFromFeed(string feedUrl, IDictionary<string, ResponseItem[]> versions, CancellationToken cancellationToken)
         {
-           
-                var feedDir = Path.Combine(options.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
-                logger.LogInformation($"Download from JSON \"{feedUrl}\" started");
-                foreach (var version in versions)
+
+            var feedDir = Path.Combine(options.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
+            logger.LogInformation($"Download from JSON \"{feedUrl}\" started");
+            foreach (var version in versions)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var directory = Path.Combine(feedDir, version.Key);
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+                foreach (var file in version.Value)
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
-
-                    var directory = Path.Combine(feedDir, version.Key);
-                    if (!Directory.Exists(directory))
+                    if (file.ZipUrl == null)
                     {
-                        Directory.CreateDirectory(directory);
+                        logger.LogWarning($"Empty ZipUrl found for version '{version.Key}' in {feedUrl}");
+                        continue;
                     }
-                    foreach (var file in version.Value)
+                    var serverPath = file.ZipUrl.PathAndQuery;
+                    var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf("/") + 1)..]);
+                    if (!File.Exists(outputFile))
                     {
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            return;
-                        }
-                        if (file.ZipUrl == null) { continue; }
-                        var serverPath = file.ZipUrl.PathAndQuery;
-                        var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf("/") + 1)..]);
-                        if (!File.Exists(outputFile))
-                        {
-                            await DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
-                        }
+                        await DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
                     }
                 }
-                logger.LogInformation($"All files from \"{feedUrl}\" successfully downloaded.");
-          
+            }
+            logger.LogInformation($"All files from \"{feedUrl}\" successfully downloaded.");
+
         }
 
         private async Task DownloadFile(ResponseItem file, string outputFile, CancellationToken cancellationToken)
