@@ -16,9 +16,10 @@ namespace EpicMorg.Atlassian.Downloader
         /// Atlassian archive downloader. See https://github.com/EpicMorg/atlassian-downloader for more info
         /// </summary>
         /// <param name="Action">Action to perform</param>
-        /// <param name="OutputDir">Override output directory to download.</param>
-        /// <param name="customFeed">Override URIs to import.</param>
-        static async Task Main(string OutputDir = "atlassian", Uri[] customFeed = null, DownloadAction Action = DownloadAction.Download) => await
+        /// <param name="OutputDir">Override output directory to download</param>
+        /// <param name="customFeed">Override URIs to import</param>
+        /// <param name="Version">Show credits" banner</param>
+        static async Task Main(string OutputDir = "atlassian", Uri[] customFeed = null, DownloadAction Action = DownloadAction.Download, bool Version = false) => await
             Host
                 .CreateDefaultBuilder()
                 .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables())
@@ -40,7 +41,7 @@ namespace EpicMorg.Atlassian.Downloader
                                 .AddSerilog(dispose: true);
                        })
                        .AddHostedService<DonloaderService>()
-                       .AddSingleton(new DownloaderOptions(OutputDir, customFeed, Action))
+                       .AddSingleton(new DownloaderOptions(OutputDir, customFeed, Action, Version))
                        .AddHttpClient())
                 .RunConsoleAsync()
                 .ConfigureAwait(false);

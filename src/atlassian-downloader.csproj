@@ -10,7 +10,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
     <PackageId>EpicMorg.Atlassian.Downloader</PackageId>
-    <Authors>Atlassian Downloader</Authors>
+    <Authors>EpicMorg, kasthack, stam</Authors>
     <Description>Atlassian Downloader by EpicMorg</Description>
     <PackageProjectUrl>https://github.com/EpicMorg/atlassian-downloader</PackageProjectUrl>
     <PackageIcon>favicon.png</PackageIcon>
@@ -23,6 +23,7 @@
     <Copyright>EpicMorg 2021</Copyright>
     <Product>Atlassian Downloader</Product>
     <IsPackable>true</IsPackable>
+    <Company>EpicMorg</Company>
   </PropertyGroup>
 
   <ItemGroup>

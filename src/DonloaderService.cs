@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,20 @@ namespace EpicMorg.Atlassian.Downloader
         private readonly DownloaderOptions options;
         private readonly HttpClient client;
         private readonly IHostApplicationLifetime hostApplicationLifetime;
+        private readonly string assemblyEnvironment = string.Format("[{1}, {0}]",
+    System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant(),
+    System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+        private readonly string assemblyVersion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+        private readonly string assemblyName = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyProductAttribute>().Product;
+        const string assemblyBuildType =
+#if DEBUG
+                "[Debug]"
+#else
+            
+                "[Release]"
+#endif
+            ;
 
         public DonloaderService(IHostApplicationLifetime hostApplicationLifetime, ILogger<DonloaderService> logger, HttpClient client, DownloaderOptions options)
         {
@@ -26,50 +41,138 @@ namespace EpicMorg.Atlassian.Downloader
             this.options = options;
             this.hostApplicationLifetime = hostApplicationLifetime;
         }
+        public const ConsoleColor DEFAULT = ConsoleColor.Blue;
+
+        public static void WriteColorLine(string text, params object[] args)
+        {
+            Dictionary<char, ConsoleColor> colors = new()
+            {
+                { '!', ConsoleColor.Red },
+                { '@', ConsoleColor.Green },
+                { '#', ConsoleColor.Blue },
+                { '$', ConsoleColor.Magenta },
+                { '&', ConsoleColor.Yellow },
+                { '%', ConsoleColor.Cyan }
+            };
+            // TODO: word wrap, backslash escapes
+            text = string.Format(text, args);
+            string chunk = "";
+            bool paren = false;
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (colors.ContainsKey(c) && StringNext(text, i) != ' ')
+                {
+                    Console.Write(chunk);
+                    chunk = "";
+                    if (StringNext(text, i) == '(')
+                    {
+                        i++; // skip past the paren
+                        paren = true;
+                    }
+                    Console.ForegroundColor = colors[c];
+                }
+                else if (paren && c == ')')
+                {
+                    paren = false;
+                    Console.ForegroundColor = DEFAULT;
+                }
+                else if (Console.ForegroundColor != DEFAULT)
+                {
+                    Console.Write(c);
+                    if (c == ' ' && !paren)
+                        Console.ForegroundColor = DEFAULT;
+                }
+                else
+                    chunk += c;
+            }
+            Console.WriteLine(chunk);
+            Console.ForegroundColor = DEFAULT;
+        }
+
+        public static char StringPrev(string text, int index)
+        {
+            return (index == 0 || text.Length == 0) ? '\0' : text[index - 1];
+        }
+
+        public static char StringNext(string text, int index)
+        {
+            return (index < text.Length) ? text[index + 1] : '\0';
+        }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            this.SetConsoleTitle();
-            var feedUrls = this.GetFeedUrls();
-
-            logger.LogInformation($"Task started");
-            foreach (var feedUrl in feedUrls)
+            SetConsoleTitle();
+            if (options.Version)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-                var (json, versions) = await this.GetJson(feedUrl, cancellationToken).ConfigureAwait(false);
+                logger.LogInformation($"{assemblyName} {assemblyVersion} {assemblyEnvironment} {assemblyBuildType}");
+                Console.BackgroundColor = ConsoleColor.Black;
+                WriteColorLine("%╔═╦═══════════════════════════════════════════════════════════════════════════════════════╦═╗");
+                WriteColorLine("%╠═╝                  .''.                                                                 %╚═%╣");
+                WriteColorLine("%║                 .:cc;.                                                                    %║");
+                WriteColorLine("%║                .;cccc;.                                                                   %║");
+                WriteColorLine("%║               .;cccccc;.             !╔══════════════════════════════════════════════╗     %║");
+                WriteColorLine("%║               .:ccccccc;.            !║    "+ assemblyName +"                      !║     %║");
+                WriteColorLine("%║               'ccccccccc;.           !╠══════════════════════════════════════════════╣     %║");
+                WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kastkack                         !║     %║");
+                WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
+                WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
+                WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: "+ assemblyVersion + "                          !║     %║");
+                WriteColorLine("%║        .,,,,,'.';cccccccccccc;.      !║    &GitHub:  $EpicMorg/atlassian-downloader    !║     %║");
+                WriteColorLine("%║       .,;;;;;,'.':cccccccccccc;.     !╚══════════════════════════════════════════════╝     %║");
+                WriteColorLine("%║      .;:;;;;;;,...:cccccccccccc;.                                                         %║");
+                WriteColorLine("%║     .;:::::;;;;'. .;:ccccccccccc;.                                                        %║");
+                WriteColorLine("%║    .:cc::::::::,.  ..:ccccccccccc;.                                                       %║");
+                WriteColorLine("%║   .:cccccc:::::'     .:ccccccccccc;.                                                      %║");
+                WriteColorLine("%║  .;:::::::::::,.      .;:::::::::::,.                                                     %║");
+                WriteColorLine("%╠═╗ ............          ............                                                    %╔═╣");
+                WriteColorLine("%╚═╩═══════════════════════════════════════════════════════════════════════════════════════╩═╝");
+                Console.ResetColor();
+            }
+            else
+            {
+                var feedUrls = this.GetFeedUrls();
 
-                switch (options.Action)
+                logger.LogInformation($"Task started");
+                foreach (var feedUrl in feedUrls)
                 {
-                    case DownloadAction.ShowRawJson:
-                        Console.Out.WriteLine(json);
-                        break;
-                    case DownloadAction.Download:
-                        await this.DownloadFilesFromFreed(feedUrl, versions, cancellationToken).ConfigureAwait(false);
-                        break;
-                    case DownloadAction.ListURLs:
-                        foreach (var versionProg in versions)
-                        {
-                            foreach (var file in versionProg.Value)
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    var (json, versions) = await this.GetJson(feedUrl, cancellationToken).ConfigureAwait(false);
+
+                    switch (options.Action)
+                    {
+                        case DownloadAction.ShowRawJson:
+                            Console.Out.WriteLine(json);
+                            break;
+                        case DownloadAction.Download:
+                            await this.DownloadFilesFromFreed(feedUrl, versions, cancellationToken).ConfigureAwait(false);
+                            break;
+                        case DownloadAction.ListURLs:
+                            foreach (var versionProg in versions)
                             {
-                                Console.Out.WriteLine(file.ZipUrl);
+                                foreach (var file in versionProg.Value)
+                                {
+                                    Console.Out.WriteLine(file.ZipUrl);
+                                }
                             }
-                        }
-                        break;
-                    case DownloadAction.ListVersions:
-                        foreach (var versionProg in versions)
-                        {
-                            foreach (var file in versionProg.Value)
+                            break;
+                        case DownloadAction.ListVersions:
+                            foreach (var versionProg in versions)
                             {
-                                Console.Out.WriteLine(file.Version);
+                                foreach (var file in versionProg.Value)
+                                {
+                                    Console.Out.WriteLine(file.Version);
+                                }
                             }
-                        }
-                        break;
+                            break;
+                    }
                 }
             }
             logger.LogInformation($"Complete");
+            
             this.hostApplicationLifetime.StopApplication();
         }
 
@@ -126,56 +229,49 @@ namespace EpicMorg.Atlassian.Downloader
 				
             };
 
-        private void SetConsoleTitle()
+        private  void SetConsoleTitle()
         {
-            const string appBuildType =
-#if DEBUG
-                "[Debug]"
-#else
-            
-                "[Release]"
-#endif
-            ;
-            var assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName();
-            Console.Title = $@"{assemblyName.Name} {assemblyName.Version} {appBuildType}";
+            Console.Title = $@"{assemblyName} {assemblyVersion} {assemblyEnvironment} - {assemblyBuildType}";
         }
 
         private async Task DownloadFilesFromFreed(string feedUrl, IDictionary<string, ResponseItem[]> versions, CancellationToken cancellationToken)
         {
-            var feedDir = Path.Combine(options.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
-            logger.LogInformation($"Download from JSON \"{feedUrl}\" started");
-            foreach (var version in versions)
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                var directory = Path.Combine(feedDir, version.Key);
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-                foreach (var file in version.Value)
+           
+                var feedDir = Path.Combine(options.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
+                logger.LogInformation($"Download from JSON \"{feedUrl}\" started");
+                foreach (var version in versions)
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
-                    if (file.ZipUrl == null) { continue; }
-                    var serverPath = file.ZipUrl.PathAndQuery;
-                    var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf("/") + 1)..]);
-                    if (!File.Exists(outputFile))
+
+                    var directory = Path.Combine(feedDir, version.Key);
+                    if (!Directory.Exists(directory))
                     {
-                        await DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
+                        Directory.CreateDirectory(directory);
                     }
-                    else
+                    foreach (var file in version.Value)
                     {
-                        logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
+                        if (file.ZipUrl == null) { continue; }
+                        var serverPath = file.ZipUrl.PathAndQuery;
+                        var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf("/") + 1)..]);
+                        if (!File.Exists(outputFile))
+                        {
+                            await DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
+                        }
                     }
                 }
-            }
-            logger.LogInformation($"All files from \"{feedUrl}\" successfully downloaded.");
+                logger.LogInformation($"All files from \"{feedUrl}\" successfully downloaded.");
+          
         }
 
         private async Task DownloadFile(ResponseItem file, string outputFile, CancellationToken cancellationToken)
@@ -205,6 +301,8 @@ namespace EpicMorg.Atlassian.Downloader
             logger.LogInformation($"File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task StopAsync(CancellationToken cancellationToken) { }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
     }
 }
