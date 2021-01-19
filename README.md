@@ -7,30 +7,69 @@ Console app written with `c#` and `dotnet5` for downloading all avalible product
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/8fd59dfb0514aeff8556761c2f9862185d3489ea/.github/screenshot-1.png)
 
 ## Requerments
-1. Preinstalled `dotnet5`. Download [here](https://dotnet.microsoft.com/download/dotnet/5.0).
+1. Preinstalled`*` `dotnet5`. Download [here](https://dotnet.microsoft.com/download/dotnet/5.0).
 2. Supported OS: `win32/win64`, `linux`, `macosx`, `arm/arm64`
 
-## How to
+`*` since version `1.0.0.4` application build asstandalone package and do not requre preinstalled `dotnet5`.
+
+# How to...
+## ..bootstrap from scratch
 1. `git clone` this repo.
 2. `cd` to `<repo>/src`.
-3. execute `donten run` in `src` folder.
+3.1 execute `donten run` in `src` folder.
+or
+3.2 execute `build.bat(sh)` in `src` folder.
 4. by default all data will be downloaded to `src/atlassian` folder and subfolders.
 
-## Usage
+## ..install
+1. go to `releases`
+2. download `package`
+3. ...
+4. profit!
+
+# Usage ans settings
+## CLI args
 
 ```
+atlassian-downloader:
+  Atlassian archive downloader. See https://github.com/EpicMorg/atlassian-downloader for more info
+
 Usage:
   atlassian-downloader [options]
 
 Options:
-  --output-dir <output-dir>      Override output directory to download [default: atlassian]
-  --list                         Show all download links from feed without downloading [default: False]
-  --custom-feed <custom-feed>    Override URIs to import. [default: ]
-  --version                      Show version information
-  -?, -h, --help                 Show help and usage information
-```
+  --action <Download|ListURLs|ListVersions|ShowRawJson>    Action to perform [default: Download]
+  --output-dir <output-dir>                                Override output directory to download. [default: atlassian]
+  --custom-feed <custom-feed>                              Override URIs to import. [default: ]
+  --version                                                Show version information
+  -?, -h, --help                                           Show help and usage information
 
-## Supported products:
+```
+## Additional settings
+File `src/appSettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file.
+
+### Supported log levels
+| Level | Enum | Description
+|:-------------|:-------------:|-------------:|
+| `Critical` | `5` | Logs that describe an unrecoverable application or system crash, or a catastrophic failure that requires immediate attention.
+| `Debug`	| `1` | Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.
+| `Error` | `4` | Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.
+| `Information` | `2` | Logs that track the general flow of the application. These logs should have long-term value.
+| `None` | `6` | Not used for writing log messages. Specifies that a logging category should not write any messages.
+| `Trace`	| `0` | Logs that contain the most detailed messages. These messages may contain sensitive application data. These messages are disabled by default and should never be enabled in a production environment.
+| `Warning` | `3` | Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the application execution to stop.
+
+### Supported console themes
+The following built-in themes are available, provided by `Serilog.Sinks.Console` package:
+
+ * `ConsoleTheme.None` - no styling
+ * `SystemConsoleTheme.Literate` - styled to replicate _Serilog.Sinks.Literate_, using the `System.Console` coloring modes supported on all Windows/.NET targets; **this is the default when no theme is specified**
+ * `SystemConsoleTheme.Grayscale` - a theme using only shades of gray, white, and black
+ * `AnsiConsoleTheme.Literate` - an ANSI 16-color version of the "literate" theme; we expect to update this to use 256-colors for a more refined look in future
+ * `AnsiConsoleTheme.Grayscale` - an ANSI 256-color version of the "grayscale" theme
+ * `AnsiConsoleTheme.Code` - an ANSI 256-color Visual Studio Code-inspired theme
+
+# Supported products:
 
 | Product | Current | Archive | EAP  |
 |-------------|:-------------:|:-------------:|:-------------:|
