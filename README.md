@@ -22,12 +22,11 @@ or
 4. by default all data will be downloaded to `src/atlassian` folder and subfolders.
 
 ## ..install
-1. go to `releases`
-2. download `package`
-3. ...
-4. profit!
+1. download latest [![Release](https://img.shields.io/github/v/release/EpicMorg/atlassian-downloader?style=flat-square)](https://github.com/EpicMorg/atlassian-downloader/releases)
+2. ...
+3. profit!
 
-# Usage ans settings
+# Usage and settings
 ## CLI args
 
 ```
@@ -50,7 +49,7 @@ File `src/appSettings.json` contains additional settings, like [loglevel](https:
 
 ### Supported log levels
 | Level | Enum | Description
-|:-------------|:-------------:|-------------:|
+|-------------|:-------------:|-------------|
 | `Critical` | `5` | Logs that describe an unrecoverable application or system crash, or a catastrophic failure that requires immediate attention.
 | `Debug`	| `1` | Logs that are used for interactive investigation during development. These logs should primarily contain information useful for debugging and have no long-term value.
 | `Error` | `4` | Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a failure in the current activity, not an application-wide failure.
