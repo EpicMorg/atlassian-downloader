@@ -4,7 +4,8 @@
 
 Console app written with `c#` and `dotnet5` for downloading all avalible products from `Atlassian`. Why not?
 
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/8fd59dfb0514aeff8556761c2f9862185d3489ea/.github/screenshot-1.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-01.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-03.png)
 
 ## Requerments
 1. Preinstalled`*` `dotnet5`. Download [here](https://dotnet.microsoft.com/download/dotnet/5.0).
@@ -29,6 +30,8 @@ or
 # Usage and settings
 ## CLI args
 
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-02.png)
+
 ```
 atlassian-downloader:
   Atlassian archive downloader. See https://github.com/EpicMorg/atlassian-downloader for more info
@@ -43,6 +46,8 @@ Options:
   --version                                                Show credits banner [default: False]
   -?, -h, --help                                           Show help and usage information
 ```
+
+
 ## Additional settings
 File `src/appSettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file.
 
