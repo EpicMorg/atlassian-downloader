@@ -47,7 +47,7 @@ namespace EpicMorg.Atlassian.Downloader
                         Console.Out.WriteLine(json);
                         break;
                     case DownloadAction.Download:
-                        await this.DownloadFilesFromFreed(feedUrl, versions, cancellationToken).ConfigureAwait(false);
+                        await this.DownloadFilesFromFeed(feedUrl, versions, cancellationToken).ConfigureAwait(false);
                         break;
                     case DownloadAction.ListURLs:
                         foreach (var versionProg in versions)
@@ -77,11 +77,14 @@ namespace EpicMorg.Atlassian.Downloader
         {
             var atlassianJson = await client.GetStringAsync(feedUrl, cancellationToken).ConfigureAwait(false);
             var json = atlassianJson.Trim()["downloads(".Length..^1];
+            logger.LogTrace("Downloaded json: {0}", json);
             var parsed = JsonSerializer.Deserialize<ResponseItem[]>(json, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+            logger.LogDebug("Found {0} releases", parsed.Length);
             var versions = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
+            logger.LogDebug("Found {0} releases", versions.Count);
 
             return (json, versions);
         }
@@ -123,7 +126,7 @@ namespace EpicMorg.Atlassian.Downloader
 				
 				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json
 				"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json"
-				
+
             };
 
         private void SetConsoleTitle()
@@ -140,7 +143,7 @@ namespace EpicMorg.Atlassian.Downloader
             Console.Title = $@"{assemblyName.Name} {assemblyName.Version} {appBuildType}";
         }
 
-        private async Task DownloadFilesFromFreed(string feedUrl, IDictionary<string, ResponseItem[]> versions, CancellationToken cancellationToken)
+        private async Task DownloadFilesFromFeed(string feedUrl, IDictionary<string, ResponseItem[]> versions, CancellationToken cancellationToken)
         {
             var feedDir = Path.Combine(options.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..(feedUrl.LastIndexOf('.'))]);
             logger.LogInformation($"Download from JSON \"{feedUrl}\" started");
@@ -162,7 +165,11 @@ namespace EpicMorg.Atlassian.Downloader
                     {
                         return;
                     }
-                    if (file.ZipUrl == null) { continue; }
+                    if (file.ZipUrl == null)
+                    {
+                        logger.LogWarning($"Empty ZipUrl found for version '{version.Key}' in {feedUrl}");
+                        continue;
+                    }
                     var serverPath = file.ZipUrl.PathAndQuery;
                     var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf("/") + 1)..]);
                     if (!File.Exists(outputFile))
