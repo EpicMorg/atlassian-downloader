@@ -18,7 +18,7 @@ namespace EpicMorg.Atlassian.Downloader
         /// <param name="Action">Action to perform</param>
         /// <param name="OutputDir">Override output directory to download</param>
         /// <param name="customFeed">Override URIs to import</param>
-        /// <param name="Version">Show credits" banner</param>
+        /// <param name="Version">Show credits banner</param>
         static async Task Main(string OutputDir = "atlassian", Uri[] customFeed = null, DownloadAction Action = DownloadAction.Download, bool Version = false) => await
             Host
                 .CreateDefaultBuilder()
