@@ -105,34 +105,13 @@ namespace EpicMorg.Atlassian.Downloader
             SetConsoleTitle();
             if (options.Version)
             {
-                logger.LogInformation($"{assemblyName} {assemblyVersion} {assemblyEnvironment} {assemblyBuildType}");
-                Console.BackgroundColor = ConsoleColor.Black;
-                WriteColorLine("%╔═╦═══════════════════════════════════════════════════════════════════════════════════════╦═╗");
-                WriteColorLine("%╠═╝                  .''.                                                                 %╚═%╣");
-                WriteColorLine("%║                 .:cc;.                                                                    %║");
-                WriteColorLine("%║                .;cccc;.                                                                   %║");
-                WriteColorLine("%║               .;cccccc;.             !╔══════════════════════════════════════════════╗     %║");
-                WriteColorLine("%║               .:ccccccc;.            !║    " + assemblyName + "                      !║     %║");
-                WriteColorLine("%║               'ccccccccc;.           !╠══════════════════════════════════════════════╣     %║");
-                WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kastkack                         !║     %║");
-                WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
-                WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
-                WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: " + assemblyVersion + "                          !║     %║");
-                WriteColorLine("%║        .,,,,,'.';cccccccccccc;.      !║    &GitHub:  $EpicMorg/atlassian-downloader    !║     %║");
-                WriteColorLine("%║       .,;;;;;,'.':cccccccccccc;.     !╚══════════════════════════════════════════════╝     %║");
-                WriteColorLine("%║      .;:;;;;;;,...:cccccccccccc;.                                                         %║");
-                WriteColorLine("%║     .;:::::;;;;'. .;:ccccccccccc;.                                                        %║");
-                WriteColorLine("%║    .:cc::::::::,.  ..:ccccccccccc;.                                                       %║");
-                WriteColorLine("%║   .:cccccc:::::'     .:ccccccccccc;.                                                      %║");
-                WriteColorLine("%║  .;:::::::::::,.      .;:::::::::::,.                                                     %║");
-                WriteColorLine("%╠═╗ ............          ............                                                    %╔═╣");
-                WriteColorLine("%╚═╩═══════════════════════════════════════════════════════════════════════════════════════╩═╝");
-                Console.ResetColor();
+                ShowVersionInfo();
             }
             else
             {
                 var feedUrls = this.GetFeedUrls();
 
+                ShowVersionInfo();
                 logger.LogInformation($"Task started");
                 foreach (var feedUrl in feedUrls)
                 {
@@ -174,6 +153,33 @@ namespace EpicMorg.Atlassian.Downloader
             logger.LogInformation($"Complete");
 
             this.hostApplicationLifetime.StopApplication();
+        }
+
+        private void ShowVersionInfo()
+        {
+            logger.LogInformation($"{assemblyName} {assemblyVersion} {assemblyEnvironment} {assemblyBuildType}");
+            Console.BackgroundColor = ConsoleColor.Black;
+            WriteColorLine("%╔═╦═══════════════════════════════════════════════════════════════════════════════════════╦═╗");
+            WriteColorLine("%╠═╝                  .''.                                                                 %╚═%╣");
+            WriteColorLine("%║                 .:cc;.                                                                    %║");
+            WriteColorLine("%║                .;cccc;.                                                                   %║");
+            WriteColorLine("%║               .;cccccc;.             !╔══════════════════════════════════════════════╗     %║");
+            WriteColorLine("%║               .:ccccccc;.            !║    " + assemblyName + "                      !║     %║");
+            WriteColorLine("%║               'ccccccccc;.           !╠══════════════════════════════════════════════╣     %║");
+            WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kastkack                         !║     %║");
+            WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
+            WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
+            WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: " + assemblyVersion + "                          !║     %║");
+            WriteColorLine("%║        .,,,,,'.';cccccccccccc;.      !║    &GitHub:  $EpicMorg/atlassian-downloader    !║     %║");
+            WriteColorLine("%║       .,;;;;;,'.':cccccccccccc;.     !╚══════════════════════════════════════════════╝     %║");
+            WriteColorLine("%║      .;:;;;;;;,...:cccccccccccc;.                                                         %║");
+            WriteColorLine("%║     .;:::::;;;;'. .;:ccccccccccc;.                                                        %║");
+            WriteColorLine("%║    .:cc::::::::,.  ..:ccccccccccc;.                                                       %║");
+            WriteColorLine("%║   .:cccccc:::::'     .:ccccccccccc;.                                                      %║");
+            WriteColorLine("%║  .;:::::::::::,.      .;:::::::::::,.                                                     %║");
+            WriteColorLine("%╠═╗ ............          ............                                                    %╔═╣");
+            WriteColorLine("%╚═╩═══════════════════════════════════════════════════════════════════════════════════════╩═╝");
+            Console.ResetColor();
         }
 
         private async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetJson(string feedUrl, CancellationToken cancellationToken)
