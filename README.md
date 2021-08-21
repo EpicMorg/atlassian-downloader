@@ -2,16 +2,16 @@
 
 # Atlassian Downloader
 
-Console app written with `c#` and `dotnet5` for downloading all avalible products from `Atlassian`. Why not?
+Console app written with `c#` and `dotnet6` for downloading all avalible products from `Atlassian`. Why not?
 
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-01.png)
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-03.png)
 
 ## Requerments
-1. Preinstalled`*` `dotnet5`. Download [here](https://dotnet.microsoft.com/download/dotnet/5.0).
+1. Preinstalled`*` `dotnet6`. Download [here](https://dotnet.microsoft.com/download/dotnet/6.0).
 2. Supported OS: `win32/win64`, `linux`, `macosx`, `arm/arm64`
 
-`*` since version `1.0.0.4` application build asstandalone package and do not requre preinstalled `dotnet5`.
+`*` since version `1.0.0.4` application build asstandalone package and do not requre preinstalled `dotnet6`.
 
 # How to...
 ## ..bootstrap from scratch
