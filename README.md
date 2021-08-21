@@ -4,8 +4,8 @@
 
 Console app written with `c#` and `dotnet6` for downloading all avalible products from `Atlassian`. Why not?
 
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-01.png)
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-03.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/1dc3c00741de6f0def32e0d68c4b1c03e5d6c532/.github/media/screenshot-01.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/1dc3c00741de6f0def32e0d68c4b1c03e5d6c532/.github/media/screenshot-03.png)
 
 ## Requerments
 1. Preinstalled`*` `dotnet6`. Download [here](https://dotnet.microsoft.com/download/dotnet/6.0).
@@ -30,7 +30,7 @@ or
 # Usage and settings
 ## CLI args
 
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/74889a1b5cfa4d68c8c9175945481853f52aefed/.github/media/screenshot-02.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/1dc3c00741de6f0def32e0d68c4b1c03e5d6c532/.github/media/screenshot-02.png)
 
 ```
 atlassian-downloader:
