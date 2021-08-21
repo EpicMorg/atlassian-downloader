@@ -19,7 +19,7 @@
     <PackageTags>atlassian, donwloader, epicmorg</PackageTags>
     <AssemblyVersion>1.0.0.8</AssemblyVersion>
     <FileVersion>1.0.0.8</FileVersion>
-    <Version>1.0.0.7</Version>
+    <Version>1.0.0.8</Version>
     <Copyright>EpicMorg 2021</Copyright>
     <Product>Atlassian Downloader</Product>
     <IsPackable>true</IsPackable>
