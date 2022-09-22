@@ -166,7 +166,7 @@ namespace EpicMorg.Atlassian.Downloader
             WriteColorLine("%║               .;cccccc;.             !╔══════════════════════════════════════════════╗     %║");
             WriteColorLine("%║               .:ccccccc;.            !║    " + assemblyName + "                      !║     %║");
             WriteColorLine("%║               'ccccccccc;.           !╠══════════════════════════════════════════════╣     %║");
-            WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kastkack                         !║     %║");
+            WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kasthack                         !║     %║");
             WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
             WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
             WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: " + assemblyVersion + "                          !║     %║");
