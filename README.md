@@ -2,7 +2,7 @@
 
 # Atlassian Downloader
 
-Console app written with `c#` and `dotnet6` for downloading all avalible products from `Atlassian`. Why not?
+Console app written with `c#` and `dotnet7` for downloading all avalible products from `Atlassian`. Why not?
 
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/1dc3c00741de6f0def32e0d68c4b1c03e5d6c532/.github/media/screenshot-01.png)
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/1dc3c00741de6f0def32e0d68c4b1c03e5d6c532/.github/media/screenshot-03.png)
