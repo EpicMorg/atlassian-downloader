@@ -64,6 +64,10 @@ or
 bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian" --custom-feed https://my.atlassian.com/download/feeds/current/bamboo.json
 ```
 
+### cron or crontab example
+``` 
+0 0 * 1 0 /opt/epicmorg/atlassian-downloader/atlassian-downloader  --output-dir "/mnt/nfs/atlassian"
+```
 ### Show only urls from jsons
 ```
 PS> .\atlassian-downloader.exe --action ListURLs
