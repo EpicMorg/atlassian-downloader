@@ -47,6 +47,21 @@ Options:
   -?, -h, --help                                           Show help and usage information
 ```
 
+## Example of useage:
+
+### Download or update all local archive
+```
+PS>   .\atlassian-downloader.exe --output-dir "P:\Atlassian"
+or
+bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian"
+```
+If you already have some folders at output path, they will be ignored and not be downloaded again and skipped. Downloader will be download only new versions of files which not be present locally yet.
+
+### Show only urls from jsons
+```
+PS>   .\atlassian-downloader.exe --action ListURLsor
+bash# ./atlassian-downloader --action ListURLs
+```
 
 ## Additional settings
 File `src/appSettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file.
