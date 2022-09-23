@@ -49,13 +49,20 @@ Options:
 
 ## Example of useage:
 
-### Download or update all local archive
+### How to download it all at first time, or get update of local archive
 ```
 PS> .\atlassian-downloader.exe --output-dir "P:\Atlassian"
 or
 bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian"
 ```
-If you already have some folders at output path, they will be ignored and not be downloaded again and skipped. Downloader will be download only new versions of files which not be present locally yet.
+If you already have some folders at output path - they will be ignored and not be downloaded again and skipped. Downloader will be download only new versions of files which not be present locally yet.
+
+### Set only some url feed and dowload it:
+```
+PS> .\atlassian-downloader.exe --output-dir "P:\Atlassian" --custom-feed https://my.atlassian.com/download/feeds/current/bamboo.json
+or
+bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian" --custom-feed https://my.atlassian.com/download/feeds/current/bamboo.json
+```
 
 ### Show only urls from jsons
 ```
