@@ -51,7 +51,7 @@ Options:
 
 ### Download or update all local archive
 ```
-PS>   .\atlassian-downloader.exe --output-dir "P:\Atlassian"
+PS> .\atlassian-downloader.exe --output-dir "P:\Atlassian"
 or
 bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian"
 ```
@@ -59,7 +59,8 @@ If you already have some folders at output path, they will be ignored and not be
 
 ### Show only urls from jsons
 ```
-PS>   .\atlassian-downloader.exe --action ListURLsor
+PS> .\atlassian-downloader.exe --action ListURLs
+or
 bash# ./atlassian-downloader --action ListURLs
 ```
 
