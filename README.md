@@ -47,6 +47,33 @@ Options:
   -?, -h, --help                                           Show help and usage information
 ```
 
+## Example of useage:
+
+### How to download it all at first time, or get update of local archive
+```
+PS> .\atlassian-downloader.exe --output-dir "P:\Atlassian"
+or
+bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian"
+```
+If you already have some folders at output path - they will be ignored and not be downloaded again and skipped. Downloader will be download only new versions of files which not be present locally yet.
+
+### Set only some url feed and dowload it:
+```
+PS> .\atlassian-downloader.exe --output-dir "P:\Atlassian" --custom-feed https://my.atlassian.com/download/feeds/current/bamboo.json
+or
+bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian" --custom-feed https://my.atlassian.com/download/feeds/current/bamboo.json
+```
+
+### cron or crontab example
+``` 
+0 0 * 1 0 /opt/epicmorg/atlassian-downloader/atlassian-downloader  --output-dir "/mnt/nfs/atlassian"
+```
+### Show only urls from jsons
+```
+PS> .\atlassian-downloader.exe --action ListURLs
+or
+bash# ./atlassian-downloader --action ListURLs
+```
 
 ## Additional settings
 File `src/appSettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file.
