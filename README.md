@@ -17,7 +17,7 @@ Console app written with `c#` and `dotnet6` for downloading all avalible product
 ## ..bootstrap from scratch
 1. `git clone` this repo.
 2. `cd` to `<repo>/src`.
-3.1 execute `donten run` in `src` folder.
+3.1 execute `dotnet run` in `src` folder.
 or
 3.2 execute `build.bat(sh)` in `src` folder.
 4. by default all data will be downloaded to `src/atlassian` folder and subfolders.
@@ -47,7 +47,7 @@ Options:
   -?, -h, --help                                           Show help and usage information
 ```
 
-## Example of useage:
+## Example of usage:
 
 ### How to download it all at first time, or get update of local archive
 ```
