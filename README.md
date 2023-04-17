@@ -27,6 +27,12 @@ or
 2. ...
 3. profit!
 
+# Intall via Chocolatey
+| CLI | Version   | Downloads
+| ------  | ------ | ------ 
+| :computer: `choco install atlassian-downloader` |  [![Version](https://img.shields.io/chocolatey/v/atlassian-downloader?label=version&style=for-the-badge)](https://chocolatey.org/packages/atlassian-downloader/) | [![Version](https://img.shields.io/chocolatey/dt/atlassian-downloader?style=for-the-badge)](https://chocolatey.org/packages/atlassian-downloader/) 
+
+
 # Usage and settings
 ## CLI args
 
