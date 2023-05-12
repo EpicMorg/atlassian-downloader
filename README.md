@@ -111,6 +111,7 @@ The following built-in themes are available, provided by `Serilog.Sinks.Console`
 |-------------|:-------------:|:-------------:|:-------------:|
 | [![Product](https://img.shields.io/static/v1?label=Atlassian&message=Bamboo&color=bright%20green&style=for-the-badge)](https://www.atlassian.com/software/bamboo) | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | [![Product](https://img.shields.io/static/v1?label=Atlassian&message=Bitbucket%20(Stash)&color=bright%20green&style=for-the-badge)](https://www.atlassian.com/software/bitbucket) | :white_check_mark: | :white_check_mark: | :interrobang: |
+| [![Product](https://img.shields.io/static/v1?label=Atlassian&message=Bitbucket%20(Mesh)&color=bright%20green&style=for-the-badge)](https://confluence.atlassian.com/bitbucketserver/bitbucket-mesh-compatibility-matrix-1127254859.html) | :white_check_mark: | :white_check_mark: | :interrobang: |
 | [![Product](https://img.shields.io/static/v1?label=Atlassian&message=Clover&color=bright%20green&style=for-the-badge)](https://www.atlassian.com/software/clover) | :white_check_mark: | :white_check_mark: | :x: |
 | [![Product](https://img.shields.io/static/v1?label=Atlassian&message=Confluence&color=bright%20green&style=for-the-badge)](https://www.atlassian.com/software/confluence) | :white_check_mark: | :white_check_mark: | :x: |
 | [![Product](https://img.shields.io/static/v1?label=Atlassian&message=Crowd&color=bright%20green&style=for-the-badge)](https://www.atlassian.com/software/crowd) | :white_check_mark: | :white_check_mark: | :x: |

@@ -103,7 +103,7 @@ namespace EpicMorg.Atlassian.Downloader
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             SetConsoleTitle();
-            if (options.Version)
+            if (options.Version || string.IsNullOrWhiteSpace(options.OutputDir))
             {
                 ShowVersionInfo();
             }
@@ -119,7 +119,7 @@ namespace EpicMorg.Atlassian.Downloader
                     {
                         return;
                     }
-                    var (json, versions) = await this.GetJson(feedUrl, cancellationToken).ConfigureAwait(false);
+                    var (json, versions) = await this.GetJson(feedUrl, options.ProductVersion, cancellationToken).ConfigureAwait(false);
 
                     switch (options.Action)
                     {
@@ -182,7 +182,7 @@ namespace EpicMorg.Atlassian.Downloader
             Console.ResetColor();
         }
 
-        private async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetJson(string feedUrl, CancellationToken cancellationToken)
+        private async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetJson(string feedUrl, string? productVersion = null, CancellationToken cancellationToken = default)
         {
             var atlassianJson = await client.GetStringAsync(feedUrl, cancellationToken).ConfigureAwait(false);
             var json = atlassianJson.Trim()["downloads(".Length..^1];
@@ -192,7 +192,10 @@ namespace EpicMorg.Atlassian.Downloader
                 PropertyNameCaseInsensitive = true
             });
             logger.LogDebug("Found {0} releases", parsed.Length);
-            var versions = parsed.GroupBy(a => a.Version).ToDictionary(a => a.Key, a => a.ToArray());
+            var versions = parsed
+                .GroupBy(a => a.Version)
+                .Where(a => productVersion is null || a.Key == productVersion)
+                .ToDictionary(a => a.Key, a => a.ToArray());
             logger.LogDebug("Found {0} releases", versions.Count);
             return (json, versions);
         }
@@ -211,6 +214,7 @@ namespace EpicMorg.Atlassian.Downloader
                 "https://my.atlassian.com/download/feeds/archived/jira-software.json",
                 "https://my.atlassian.com/download/feeds/archived/jira.json",
                 "https://my.atlassian.com/download/feeds/archived/stash.json",
+                "https://my.atlassian.com/download/feeds/archived/mesh.json",
 
                 "https://my.atlassian.com/download/feeds/current/bamboo.json",
                 "https://my.atlassian.com/download/feeds/current/clover.json",
@@ -222,12 +226,14 @@ namespace EpicMorg.Atlassian.Downloader
                 "https://my.atlassian.com/download/feeds/current/jira-servicedesk.json",
                 "https://my.atlassian.com/download/feeds/current/jira-software.json",
                 "https://my.atlassian.com/download/feeds/current/stash.json",
+                "https://my.atlassian.com/download/feeds/current/mesh.json",
 
                 "https://my.atlassian.com/download/feeds/eap/bamboo.json",
                 "https://my.atlassian.com/download/feeds/eap/confluence.json",
                 "https://my.atlassian.com/download/feeds/eap/jira.json",
                 "https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json",
                 "https://my.atlassian.com/download/feeds/eap/stash.json",
+                "https://my.atlassian.com/download/feeds/eap/mesh.json",
 				
 				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json
 				"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json",
