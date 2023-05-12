@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 
 using System;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace EpicMorg.Atlassian.Downloader
@@ -19,13 +21,14 @@ namespace EpicMorg.Atlassian.Downloader
         /// <param name="OutputDir">Override output directory to download</param>
         /// <param name="customFeed">Override URIs to import</param>
         /// <param name="Version">Show credits banner</param>
-        static async Task Main(string OutputDir = "atlassian", Uri[] customFeed = null, DownloadAction Action = DownloadAction.Download, bool Version = false) => await
+        /// <param name="productVersion">Override target version to download some product. Advice: Use it with "customFeed".</param>
+        static async Task Main(string OutputDir, Uri[] customFeed = null, DownloadAction Action = DownloadAction.Download, bool Version = false, string productVersion = null) => await
             Host
                 .CreateDefaultBuilder()
                 .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables())
                 .ConfigureAppConfiguration((ctx, configuration) =>
                     configuration
-                        .SetBasePath(Environment.CurrentDirectory)
+                        .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
                         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                         .AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                         .AddEnvironmentVariables())
@@ -41,7 +44,7 @@ namespace EpicMorg.Atlassian.Downloader
                                 .AddSerilog(dispose: true);
                        })
                        .AddHostedService<DonloaderService>()
-                       .AddSingleton(new DownloaderOptions(OutputDir, customFeed, Action, Version))
+                       .AddSingleton(new DownloaderOptions(OutputDir, customFeed, Action, Version, productVersion))
                        .AddHttpClient())
                 .RunConsoleAsync()
                 .ConfigureAwait(false);
