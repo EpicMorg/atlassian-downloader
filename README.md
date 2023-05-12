@@ -50,6 +50,7 @@ Options:
   --custom-feed <custom-feed>                              Override URIs to import [default: ]
   --action <Download|ListURLs|ListVersions|ShowRawJson>    Action to perform [default: Download]
   --version                                                Show credits banner [default: False]
+  --product-version <product-version>                    Override target version to download some product. Advice: Use it with "customFeed". [default: ]
   -?, -h, --help                                           Show help and usage information
 ```
 
