@@ -24,6 +24,8 @@ namespace EpicMorg.Atlassian.Downloader
     System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
         private readonly string assemblyVersion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
+        private readonly string fileVersion = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+
         private readonly string assemblyName = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyProductAttribute>().Product;
         const string assemblyBuildType =
 #if DEBUG
@@ -38,6 +40,7 @@ namespace EpicMorg.Atlassian.Downloader
         {
             this.logger = logger;
             this.client = client;
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0");
             this.options = options;
             this.hostApplicationLifetime = hostApplicationLifetime;
         }
@@ -169,7 +172,7 @@ namespace EpicMorg.Atlassian.Downloader
             WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kasthack                         !║     %║");
             WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
             WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
-            WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: " + assemblyVersion + "                          !║     %║");
+            WriteColorLine("%║         .',,'..;cccccccccccc;.       !║    &Version: " + fileVersion + "                          !║     %║");
             WriteColorLine("%║        .,,,,,'.';cccccccccccc;.      !║    &GitHub:  $EpicMorg/atlassian-downloader    !║     %║");
             WriteColorLine("%║       .,;;;;;,'.':cccccccccccc;.     !╚══════════════════════════════════════════════╝     %║");
             WriteColorLine("%║      .;:;;;;;;,...:cccccccccccc;.                                                         %║");
@@ -203,6 +206,8 @@ namespace EpicMorg.Atlassian.Downloader
         private string[] GetFeedUrls() => options.CustomFeed != null
             ? options.CustomFeed.Select(a => a.ToString()).ToArray()
             : new[] {
+
+                //official links
                 "https://my.atlassian.com/download/feeds/archived/bamboo.json",
                 "https://my.atlassian.com/download/feeds/archived/clover.json",
                 "https://my.atlassian.com/download/feeds/archived/confluence.json",
@@ -216,6 +221,21 @@ namespace EpicMorg.Atlassian.Downloader
                 "https://my.atlassian.com/download/feeds/archived/stash.json",
                 "https://my.atlassian.com/download/feeds/archived/mesh.json",
 
+                //cdn mirror of official links
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/bamboo.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/clover.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/confluence.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/crowd.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/crucible.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/fisheye.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/jira-core.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/jira-servicedesk.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/jira-software.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/jira.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/stash.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/mesh.json",
+
+                //official links
                 "https://my.atlassian.com/download/feeds/current/bamboo.json",
                 "https://my.atlassian.com/download/feeds/current/clover.json",
                 "https://my.atlassian.com/download/feeds/current/confluence.json",
@@ -228,17 +248,39 @@ namespace EpicMorg.Atlassian.Downloader
                 "https://my.atlassian.com/download/feeds/current/stash.json",
                 "https://my.atlassian.com/download/feeds/current/mesh.json",
 
+                //cdn mirror of official links
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/bamboo.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/clover.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/confluence.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/crowd.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/crucible.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/fisheye.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/jira-core.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/jira-servicedesk.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current//jira-software.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/stash.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/mesh.json",
+
+                //official links
                 "https://my.atlassian.com/download/feeds/eap/bamboo.json",
                 "https://my.atlassian.com/download/feeds/eap/confluence.json",
                 "https://my.atlassian.com/download/feeds/eap/jira.json",
                 "https://my.atlassian.com/download/feeds/eap/jira-servicedesk.json",
                 "https://my.atlassian.com/download/feeds/eap/stash.json",
-                "https://my.atlassian.com/download/feeds/eap/mesh.json",
+                //"https://my.atlassian.com/download/feeds/eap/mesh.json", //404
+
+                //cdn mirror of official links
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/bamboo.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/confluence.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/jira.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/jira-servicedesk.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/stash.json",
+                //"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/mesh.json",  //404
 				
-				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json
+				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json //unstable link with r\l
 				"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json",
 				
-				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json
+				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json //unstable link with r\l
 				"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json"
 
             };

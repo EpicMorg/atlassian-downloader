@@ -1,5 +1,6 @@
 # Atlassian Downloader - Changelog
 
+* `1.0.1.1` - minor update: added `UserAgent` to HTTP headers and added mirrors of json files.
 * `1.0.1.0` - added support of `Atlassian Bitbucket (Mesh)` product, updated deps, fixed `Chocolatey` support and start logic.
 * `1.0.0.9` - updated deps.
 * `1.0.0.8` - switched to `dontet6.0`, updated deps.

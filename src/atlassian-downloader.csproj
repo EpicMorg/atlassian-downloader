@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -17,9 +17,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/EpicMorg/atlassian-downloader</RepositoryUrl>
     <PackageTags>atlassian, donwloader, epicmorg</PackageTags>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.1.0</Version>
+    <AssemblyVersion>1.0.1.1</AssemblyVersion>
+    <FileVersion>1.0.1.1</FileVersion>
+    <Version>1.0.1.1</Version>
     <Copyright>EpicMorg 2023</Copyright>
     <Product>Atlassian Downloader</Product>
     <IsPackable>true</IsPackable>
