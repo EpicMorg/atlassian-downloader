@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using System;
@@ -224,7 +224,7 @@ namespace EpicMorg.Atlassian.Downloader
                 //cdn mirror of official links
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/bamboo.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/clover.json",
-                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/confluence.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/confluence.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/crowd.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/crucible.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/fisheye.json",
@@ -273,8 +273,8 @@ namespace EpicMorg.Atlassian.Downloader
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/bamboo.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/confluence.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/jira.json",
-                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/jira-servicedesk.json",
-                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/stash.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/jira-servicedesk.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/stash.json",
                 //"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/mesh.json",  //404
 				
 				//https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json //unstable link with r\l
