@@ -257,7 +257,7 @@ namespace EpicMorg.Atlassian.Downloader
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/fisheye.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/jira-core.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/jira-servicedesk.json",
-                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current//jira-software.json",
+                "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/jira-software.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/stash.json",
                 "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/mesh.json",
 
