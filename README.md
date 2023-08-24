@@ -7,7 +7,7 @@ Console app written with `c#` and `dotnet6` for downloading all avalible product
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/87f1d7fd4e3f22b29b4be87d02d80dd0b3e0280e/.github/media/screenshot-01.png)
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/87f1d7fd4e3f22b29b4be87d02d80dd0b3e0280e/.github/media/screenshot-03.png)
 
-## Requerments
+## Requirements
 1. Preinstalled`*` `dotnet6`. Download [here](https://dotnet.microsoft.com/download/dotnet/6.0).
 2. Supported OS: `win32/win64`, `linux`, `macosx`, `arm/arm64`
 
