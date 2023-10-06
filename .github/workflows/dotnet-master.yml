@@ -4,17 +4,19 @@ on:
   push:
     branches:
       - 'master'
+    tags:
+      - '*'
   schedule:
-    - cron:  '00 00 * * 6' # At 12:00 AM, only on Saturday
+    - cron:  '02 00 * * 6' # At 02:00, only on Saturday
 
 jobs:
   build:
 
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-dotnet@v1
+    - uses: actions/checkout@v4
+    - uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '6.0.x'
         include-prerelease: true
