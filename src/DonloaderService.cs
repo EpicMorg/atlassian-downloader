@@ -15,6 +15,8 @@ namespace EpicMorg.Atlassian.Downloader
 {
     class DonloaderService : IHostedService
     {
+        private readonly string UserAgentString = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0";
+
         private readonly ILogger<DonloaderService> logger;
         private readonly DownloaderOptions options;
         private readonly HttpClient client;
@@ -40,7 +42,7 @@ namespace EpicMorg.Atlassian.Downloader
         {
             this.logger = logger;
             this.client = client;
-            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0");
+            client.DefaultRequestHeaders.Add("User-Agent", UserAgentString);
             this.options = options;
             this.hostApplicationLifetime = hostApplicationLifetime;
         }
@@ -326,7 +328,47 @@ namespace EpicMorg.Atlassian.Downloader
                     }
                     else
                     {
-                        logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
+                        logger.LogWarning($"File \"{outputFile}\" already exists. File sizes will be compared.");
+                        long localFileSize = new System.IO.FileInfo(outputFile).Length;
+                        logger.LogInformation($"Size of local file is {localFileSize} bytes.");
+                        try
+                        {
+                            var httpClient = new HttpClient();
+                            httpClient.DefaultRequestHeaders.Add("User-Agent", UserAgentString);
+                            HttpResponseMessage response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, file.ZipUrl));
+                            if (response.IsSuccessStatusCode)
+                            {
+                                if (response.Content.Headers.ContentLength.HasValue)
+                                {
+                                    long remoteFileSize = response.Content.Headers.ContentLength.Value;
+                                    logger.LogInformation($"Size of remote file is \"{remoteFileSize}\" bytes.");
+
+                                    if (remoteFileSize == localFileSize) {
+                                        logger.LogInformation($"Size of remote and local files and are same ({remoteFileSize} bytes and {localFileSize} bytes). Nothing to download. Operation skipped.");
+                                    }
+                                    else
+                                    {
+                                        logger.LogWarning($"Size of remote and local files and are not same ({remoteFileSize} bytes and {localFileSize} bytes). Download started.");
+                                        File.Delete(outputFile);
+                                        await DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
+                                    }
+
+                                }
+                                else
+                                {
+                                    logger.LogWarning($"Cant get size of remote file  \"{file.ZipUrl}\". May be server not support it feature. Sorry.");
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                logger.LogCritical($"Request execution error: \"{response.StatusCode}\". Sorry.");
+                            }
+                        }
+                        catch (HttpRequestException ex)
+                        {
+                            logger.LogCritical($"HTTP request error: \"{ex.Message}\", \"{ex.StackTrace}\", \"{ex.StatusCode}\". Sorry.");
+                        }
                     }
                 }
             }
@@ -348,14 +390,14 @@ namespace EpicMorg.Atlassian.Downloader
             }
             catch (Exception downloadEx)
             {
-                logger.LogError(downloadEx, $"Failed to download file {file.ZipUrl} to {outputFile}.");
+                logger.LogError(downloadEx, $"Failed to download file \"{file.ZipUrl}\" to \"{outputFile}\".");
                 try
                 {
                     File.Delete(outputFile);
                 }
                 catch (Exception removeEx)
                 {
-                    logger.LogError(removeEx, $"Failed to remove incomplete file {outputFile}.");
+                    logger.LogError(removeEx, $"Failed to remove incomplete file \"{outputFile}\".");
                 }
             }
             logger.LogInformation($"File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
