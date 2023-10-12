@@ -59,6 +59,8 @@ Options:
   --action <Download|ListURLs|ListVersions|ShowRawJson>  Action to perform [default: Download]
   --about                                                Show credits banner [default: False]
   --product-version <product-version>                    Override target version to download some product. Advice: Use it with "customFeed". []
+  --skip-file-check                                      Skip compare of file sizes if a local file already exists.
+                                                         Existing file will be skipped to check and redownload. [default: False]
   --version                                              Show version information
   -?, -h, --help                                         Show help and usage information
 ```

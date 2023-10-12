@@ -113,6 +113,7 @@ internal class DownloaderService : IHostedService
     private async Task DownloadFilesFromFeed(string feedUrl, IDictionary<string, ResponseItem[]> versions, CancellationToken cancellationToken)
     {
 
+
         var feedDir = Path.Combine(this.options.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..feedUrl.LastIndexOf('.')]);
         this.logger.LogInformation("Download from JSON \"{feedUrl}\" started", feedUrl);
         foreach (var version in versions)
@@ -141,6 +142,8 @@ internal class DownloaderService : IHostedService
                     continue;
                 }
 
+
+
                 var serverPath = file.ZipUrl.PathAndQuery;
                 var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf('/') + 1)..]);
                 if (!File.Exists(outputFile))
@@ -149,46 +152,54 @@ internal class DownloaderService : IHostedService
                 }
                 else
                 {
-                    this.logger.LogWarning($"File \"{outputFile}\" already exists. File sizes will be compared.");
-                    var localFileSize = new FileInfo(outputFile).Length;
-                    this.logger.LogInformation($"Size of local file is {localFileSize} bytes.");
-                    try
+                    if (this.options.SkipFileCheck == false)
                     {
-                        var httpClient = new HttpClient();
-                        httpClient.DefaultRequestHeaders.Add("User-Agent", this.UserAgentString);
-                        var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, file.ZipUrl));
-                        if (response.IsSuccessStatusCode)
+                        this.logger.LogWarning($"File \"{outputFile}\" already exists. File sizes will be compared.");
+                        var localFileSize = new FileInfo(outputFile).Length;
+                        this.logger.LogInformation($"Size of local file is {localFileSize} bytes.");
+                        try
                         {
-                            if (response.Content.Headers.ContentLength.HasValue)
+                            var httpClient = new HttpClient();
+                            httpClient.DefaultRequestHeaders.Add("User-Agent", this.UserAgentString);
+                            var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, file.ZipUrl));
+                            if (response.IsSuccessStatusCode)
                             {
-                                var remoteFileSize = response.Content.Headers.ContentLength.Value;
-                                this.logger.LogInformation($"Size of remote file is \"{remoteFileSize}\" bytes.");
-
-                                if (remoteFileSize == localFileSize)
+                                if (response.Content.Headers.ContentLength.HasValue)
                                 {
-                                    this.logger.LogInformation($"Size of remote and local files and are same ({remoteFileSize} bytes and {localFileSize} bytes). Nothing to download. Operation skipped.");
+                                    var remoteFileSize = response.Content.Headers.ContentLength.Value;
+                                    this.logger.LogInformation($"Size of remote file is \"{remoteFileSize}\" bytes.");
+
+                                    if (remoteFileSize == localFileSize)
+                                    {
+                                        this.logger.LogInformation($"Size of remote and local files and are same ({remoteFileSize} bytes and {localFileSize} bytes). Nothing to download. Operation skipped.");
+                                    }
+                                    else
+                                    {
+                                        this.logger.LogWarning($"Size of remote and local files and are not same ({remoteFileSize} bytes and {localFileSize} bytes). Download started.");
+                                        File.Delete(outputFile);
+                                        await this.DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
+                                    }
                                 }
                                 else
                                 {
-                                    this.logger.LogWarning($"Size of remote and local files and are not same ({remoteFileSize} bytes and {localFileSize} bytes). Download started.");
-                                    File.Delete(outputFile);
-                                    await this.DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
+                                    this.logger.LogWarning($"Cant get size of remote file  \"{file.ZipUrl}\". May be server not support it feature. Sorry.");
+                                    continue;
                                 }
                             }
                             else
                             {
-                                this.logger.LogWarning($"Cant get size of remote file  \"{file.ZipUrl}\". May be server not support it feature. Sorry.");
-                                continue;
+                                this.logger.LogCritical($"Request execution error: \"{response.StatusCode}\". Sorry.");
                             }
                         }
-                        else
+                        catch (HttpRequestException ex)
                         {
-                            this.logger.LogCritical($"Request execution error: \"{response.StatusCode}\". Sorry.");
+                            this.logger.LogCritical($"HTTP request error: \"{ex.Message}\", \"{ex.StackTrace}\", \"{ex.StatusCode}\". Sorry.");
                         }
-                    }
-                    catch (HttpRequestException ex)
+                        }
+                    else
                     {
-                        this.logger.LogCritical($"HTTP request error: \"{ex.Message}\", \"{ex.StackTrace}\", \"{ex.StatusCode}\". Sorry.");
+                        logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
+                        continue;
                     }
                 }
             }
