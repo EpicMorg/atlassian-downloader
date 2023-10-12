@@ -2,7 +2,8 @@
   "profiles": {
     "atlassian-downloader": {
       "commandName": "Project",
-      "commandLineArgs": "--help"
+      //"commandLineArgs": "--help"
+      "commandLineArgs": "--action=ShowRawJson --output-dir=F:\\temp\\atlassian\\test1"
     }
   }
 }
