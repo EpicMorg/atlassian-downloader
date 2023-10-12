@@ -25,9 +25,9 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/EpicMorg/atlassian-downloader</RepositoryUrl>
     <PackageTags>atlassian, donwloader, epicmorg</PackageTags>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
-    <Version>1.1.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.0.0.0</Version>
     <Copyright>EpicMorg 2023</Copyright>
     <Product>Atlassian Downloader</Product>
     <Company>EpicMorg</Company>

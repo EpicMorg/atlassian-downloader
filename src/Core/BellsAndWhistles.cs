@@ -13,7 +13,7 @@ internal class BellsAndWhistles
 
     private static readonly Assembly entryAssembly = Assembly.GetEntryAssembly();
 
-    private static readonly string assemblyVersion = entryAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+    private static readonly string assemblyVersion = entryAssembly.GetName().Version.ToString();
 
     private static readonly string fileVersion = entryAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
 
