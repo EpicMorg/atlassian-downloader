@@ -1,9 +1,12 @@
 # Atlassian Downloader - Changelog
 
 ## 2.x
-
-* `2.0.0.0` - migrated to `dotnet8` and updated libs. code optimized by [@kasthack](https://github.com/kasthack). reworked build scripts via `cli` and `vs`. added translations to `ru` and `en`. added new dists - `osx-arm64`, `linux-bionic-x64`.
-
+* `2.0.0.0` - migrated to `dotnet8` and updated libs. 
+    * code optimized by [@kasthack](https://github.com/kasthack). 
+    * reworked build scripts via `cli` and `vs`.
+    * added new dists - `osx-arm64`, `linux-bionic-x64`.
+    * added support of custom useragent via flag
+    * added suppor of skipping existing files via flag
 ## 1.x
 * `1.1.0.0` - added automatic compare of local and remote file sizes. If they differ - the file will be re-downloaded.
 * `1.0.1.1` - minor update: added `UserAgent` to HTTP headers and added mirrors of json files.

@@ -4,8 +4,8 @@
 
 Console app written with `c#` and `dotnet8` for downloading all avalible products from `Atlassian`. Why not?
 
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/87f1d7fd4e3f22b29b4be87d02d80dd0b3e0280e/.github/media/screenshot-01.png)
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/87f1d7fd4e3f22b29b4be87d02d80dd0b3e0280e/.github/media/screenshot-03.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-01.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-03.png)
 
 # Supported OS: 
 `win-x86`, `win-x64`, `win-arm64`, `linux-x86`, `linux-x64`, `linux-musl-x64`, `linux-arm`, `linux-arm64`, `linux-bionic-x64`, `osx-x64`, `osx-arm64`
@@ -44,7 +44,7 @@ Console app written with `c#` and `dotnet8` for downloading all avalible product
 # Usage and settings
 ## CLI args
 
-![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/87f1d7fd4e3f22b29b4be87d02d80dd0b3e0280e/.github/media/screenshot-02.png)
+![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-02.png)
 
 ```
 atlassian-downloader:
