@@ -1,16 +1,16 @@
 SET DOTNET_CLI_TELEMETRY_OPTOUT=true
 SET DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
 
-dotnet.exe publish --runtime win-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=true -p:PublishSingleFile=false -p:PublishReadyToRun=true
-dotnet.exe publish --runtime win-x86 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=true -p:PublishSingleFile=false -p:PublishReadyToRun=true
-dotnet.exe publish --runtime win-arm64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=true -p:PublishSingleFile=false -p:PublishReadyToRun=true
-dotnet.exe publish --runtime osx-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet.exe publish --runtime osx-arm64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet.exe publish --runtime linux-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet.exe publish --runtime linux-musl-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet.exe publish --runtime linux-arm --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet.exe publish --runtime linux-arm64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet.exe publish --runtime linux-bionic-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
+dotnet.exe publish -p:PublishProfile=win-x64 --force
+dotnet.exe publish -p:PublishProfile=win-x86 --force
+dotnet.exe publish -p:PublishProfile=win-arm64 --force
+dotnet.exe publish -p:PublishProfile=osx-x64 --force
+dotnet.exe publish -p:PublishProfile=osx-arm64 --force
+dotnet.exe publish -p:PublishProfile=linux-x64 --force
+dotnet.exe publish -p:PublishProfile=linux-musl-x64 --force
+dotnet.exe publish -p:PublishProfile=linux-arm --force
+dotnet.exe publish -p:PublishProfile=linux-arm64 --force
+dotnet.exe publish -p:PublishProfile=linux-bionic-x64 --force
 
 del /F bin\\Release\\net8.0\\win-x64\\publish\\atlassian-downloader.pdb
 del /F bin\\Release\\net8.0\\win-x86\\publish\\atlassian-downloader.pdb

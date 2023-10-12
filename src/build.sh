@@ -2,16 +2,16 @@
 export DOTNET_CLI_TELEMETRY_OPTOUT=true
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
 
-dotnet publish --runtime win-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=true -p:PublishSingleFile=false -p:PublishReadyToRun=true
-dotnet publish --runtime win-x86 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=true -p:PublishSingleFile=false -p:PublishReadyToRun=true
-dotnet publish --runtime win-arm64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=true -p:PublishSingleFile=false -p:PublishReadyToRun=true
-dotnet publish --runtime osx-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet publish --runtime osx-arm64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet publish --runtime linux-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=fal
-dotnet publish --runtime linux-musl-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=falsese
-dotnet publish --runtime linux-arm --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet publish --runtime linux-arm64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
-dotnet publish --runtime linux-bionic-x64 --force --self-contained true  --framework net8.0  --configuration Release -p:PublishTrimmed=false -p:PublishSingleFile=false -p:PublishReadyToRun=false
+dotnet publish -p:PublishProfile=win-x64 --force
+dotnet publish -p:PublishProfile=win-x86 --force
+dotnet publish -p:PublishProfile=win-arm64 --force
+dotnet publish -p:PublishProfile=osx-x64 --force
+dotnet publish -p:PublishProfile=osx-arm64 --force
+dotnet publish -p:PublishProfile=linux-x64 --force
+dotnet publish -p:PublishProfile=linux-musl-x64 --force
+dotnet publish -p:PublishProfile=linux-arm --force
+dotnet publish -p:PublishProfile=linux-arm64 --force
+dotnet publish -p:PublishProfile=linux-bionic-x64 --force
 
 rm -rfv ./bin/Release/net8.0/win-x64/publish/atlassian-downloader.pdb
 rm -rfv ./bin/Release/net8.0/win-x86/publish/atlassian-downloader.pdb
