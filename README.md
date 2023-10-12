@@ -58,9 +58,14 @@ Options:
   --custom-feed <custom-feed>                            Override URIs to import []
   --action <Download|ListURLs|ListVersions|ShowRawJson>  Action to perform [default: Download]
   --about                                                Show credits banner [default: False]
-  --product-version <product-version>                    Override target version to download some product. Advice: Use it with "customFeed". []
+  --product-version <product-version>                    Override target version to download some product. Advice: Use
+                                                         it with "customFeed". []
   --skip-file-check                                      Skip compare of file sizes if a local file already exists.
-                                                         Existing file will be skipped to check and redownload. [default: False]
+                                                         Existing file will be skipped to check and redownload.
+                                                         [default: False]
+  --user-agent <user-agent>                              Set custom user agent via this feature flag. [default:
+                                                         Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0)
+                                                         Gecko/20100101 Firefox/101.0]
   --version                                              Show version information
   -?, -h, --help                                         Show help and usage information
 ```

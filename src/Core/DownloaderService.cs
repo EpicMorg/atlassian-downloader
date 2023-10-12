@@ -16,18 +16,17 @@ using System.Threading.Tasks;
 
 internal class DownloaderService : IHostedService
 {
-    private readonly string UserAgentString = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0";
-
     private readonly ILogger<DownloaderService> logger;
     private readonly DownloaderOptions options;
     private readonly HttpClient client;
     private readonly IHostApplicationLifetime hostApplicationLifetime;
 
+
     public DownloaderService(IHostApplicationLifetime hostApplicationLifetime, ILogger<DownloaderService> logger, HttpClient client, DownloaderOptions options)
     {
         this.logger = logger;
         this.client = client;
-        client.DefaultRequestHeaders.Add("User-Agent", this.UserAgentString);
+        client.DefaultRequestHeaders.Add("User-Agent", options.UserAgent);
         this.options = options;
         this.hostApplicationLifetime = hostApplicationLifetime;
     }
@@ -92,7 +91,7 @@ internal class DownloaderService : IHostedService
     {
         var atlassianJson = await this.client.GetStringAsync(feedUrl, cancellationToken).ConfigureAwait(false);
         var json = atlassianJson.Trim()["downloads(".Length..^1];
-        this.logger.LogTrace("Downloaded json: {0}", json);
+        this.logger.LogTrace($"Downloaded json: {0}", json);
         var parsed = JsonSerializer.Deserialize<ResponseItem[]>(json, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
@@ -160,7 +159,7 @@ internal class DownloaderService : IHostedService
                         try
                         {
                             var httpClient = new HttpClient();
-                            httpClient.DefaultRequestHeaders.Add("User-Agent", this.UserAgentString);
+                            httpClient.DefaultRequestHeaders.Add("User-Agent", options.UserAgent);
                             var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, file.ZipUrl));
                             if (response.IsSuccessStatusCode)
                             {
@@ -238,7 +237,9 @@ internal class DownloaderService : IHostedService
         this.logger.LogInformation($"File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
     }
 
+
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task StopAsync(CancellationToken cancellationToken) { }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
 }

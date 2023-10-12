@@ -23,7 +23,8 @@ public class Program
     /// <param name="about">Show credits banner</param>
     /// <param name="productVersion">Override target version to download some product. Advice: Use it with "customFeed".</param>
     /// <param name="skipFileCheck">Skip compare of file sizes if a local file already exists. Existing file will be skipped to check and redownload.</param>
-    static async Task Main(string outputDir, Uri[] customFeed = null, DownloadAction action = DownloadAction.Download, bool about = false, string productVersion = null, bool skipFileCheck = false) => await
+    /// <param name="userAgent">Set custom user agent via this feature flag.</param>
+    static async Task Main(string outputDir, Uri[] customFeed = null, DownloadAction action = DownloadAction.Download, bool about = false, string productVersion = null, bool skipFileCheck = false, string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0") => await
         Host
             .CreateDefaultBuilder()
             .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables())
@@ -45,7 +46,7 @@ public class Program
                             .AddSerilog(dispose: true);
                    })
                    .AddHostedService<DownloaderService>()
-                   .AddSingleton(new DownloaderOptions(outputDir, customFeed, action, about, productVersion, skipFileCheck))
+                   .AddSingleton(new DownloaderOptions(outputDir, customFeed, action, about, productVersion, skipFileCheck, userAgent))
                    .AddHttpClient())
             .RunConsoleAsync()
             .ConfigureAwait(false);
