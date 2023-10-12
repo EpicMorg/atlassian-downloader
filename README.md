@@ -2,36 +2,44 @@
 
 # Atlassian Downloader
 
-Console app written with `c#` and `dotnet6` for downloading all avalible products from `Atlassian`. Why not?
+Console app written with `c#` and `dotnet8` for downloading all avalible products from `Atlassian`. Why not?
 
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/87f1d7fd4e3f22b29b4be87d02d80dd0b3e0280e/.github/media/screenshot-01.png)
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/87f1d7fd4e3f22b29b4be87d02d80dd0b3e0280e/.github/media/screenshot-03.png)
 
-## Requirements
-1. Preinstalled`*` `dotnet6`. Download [here](https://dotnet.microsoft.com/download/dotnet/6.0).
-2. Supported OS: `win32/win64`, `linux`, `macosx`, `arm/arm64`
+# Supported OS: 
+`win-x86`, `win-x64`, `win-arm64`, `linux-x86`, `linux-x64`, `linux-musl-x64`, `linux-arm`, `linux-arm64`, `linux-bionic-x64`, `osx-x64`, `osx-arm64`
 
-`*` since version `1.0.0.4` application build asstandalone package and do not requre preinstalled `dotnet6`.
+-------------------
 
 # How to...
-## ..bootstrap from scratch
+
+## ..develop
+1. preinstall `dotnet8`. Download [here](https://dotnet.microsoft.com/download/dotnet/8.0).
+2. preinstall `VS2022`.  Download [here](https://visualstudio.microsoft.com/vs/).
+3. `git clone` this repo.
+4. `cd` to `<repo>/src`.
+5. open `*.sln` file
+6. ...
+7. profit!
+
+## ..build from scratch
 1. `git clone` this repo.
 2. `cd` to `<repo>/src`.
-3.1 execute `dotnet run` in `src` folder.
-or
-3.2 execute `build.bat(sh)` in `src` folder.
-4. by default all data will be downloaded to `src/atlassian` folder and subfolders.
+3. execute `build.bat(sh)` in `src` folder.
+4. by default all data will be downloaded to `src/Atlassian` folder and subfolders.
 
-## ..install
-1. download latest [![Downloads](https://img.shields.io/github/downloads/EpicMorg/atlassian-downloader/total.svg?style=flat-square)](https://github.com/EpicMorg/atlassian-downloader/releases) [![Release](https://img.shields.io/github/v/release/EpicMorg/atlassian-downloader?style=flat-square)](https://github.com/EpicMorg/atlassian-downloader/releases)
+## ..use binary versions
+1. just download latest [![Downloads](https://img.shields.io/github/downloads/EpicMorg/atlassian-downloader/total.svg?style=flat-square)](https://github.com/EpicMorg/atlassian-downloader/releases) [![Release](https://img.shields.io/github/v/release/EpicMorg/atlassian-downloader?style=flat-square)](https://github.com/EpicMorg/atlassian-downloader/releases)
 2. ...
 3. profit!
 
-# Intall via Chocolatey
+## ..intall via Chocolatey
 | CLI | Version   | Downloads
 | ------  | ------ | ------ 
 | :computer: `choco install atlassian-downloader` |  [![Version](https://img.shields.io/chocolatey/v/atlassian-downloader?label=version&style=for-the-badge)](https://chocolatey.org/packages/atlassian-downloader/) | [![Version](https://img.shields.io/chocolatey/dt/atlassian-downloader?style=for-the-badge)](https://chocolatey.org/packages/atlassian-downloader/) 
 
+-------------------
 
 # Usage and settings
 ## CLI args
@@ -46,12 +54,20 @@ Usage:
   atlassian-downloader [options]
 
 Options:
-  --output-dir <output-dir>                                Override output directory to download [default: atlassian]
-  --custom-feed <custom-feed>                              Override URIs to import [default: ]
-  --action <Download|ListURLs|ListVersions|ShowRawJson>    Action to perform [default: Download]
-  --version                                                Show credits banner [default: False]
-  --product-version <product-version>                    Override target version to download some product. Advice: Use it with "customFeed". [default: ]
-  -?, -h, --help                                           Show help and usage information
+  --output-dir <output-dir>                              Override output directory to download
+  --custom-feed <custom-feed>                            Override URIs to import []
+  --action <Download|ListURLs|ListVersions|ShowRawJson>  Action to perform [default: Download]
+  --about                                                Show credits banner [default: False]
+  --product-version <product-version>                    Override target version to download some product. Advice: Use
+                                                         it with "customFeed". []
+  --skip-file-check                                      Skip compare of file sizes if a local file already exists.
+                                                         Existing file will be skipped to check and redownload.
+                                                         [default: False]
+  --user-agent <user-agent>                              Set custom user agent via this feature flag. [default:
+                                                         Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0)
+                                                         Gecko/20100101 Firefox/101.0]
+  --version                                              Show version information
+  -?, -h, --help                                         Show help and usage information
 ```
 
 ## Example of usage:
@@ -106,6 +122,8 @@ The following built-in themes are available, provided by `Serilog.Sinks.Console`
  * `AnsiConsoleTheme.Grayscale` - an ANSI 256-color version of the "grayscale" theme
  * `AnsiConsoleTheme.Code` - an ANSI 256-color Visual Studio Code-inspired theme
 
+-------------------
+
 # Supported products:
 
 | Product | Current | Archive | EAP  |
@@ -125,7 +143,7 @@ The following built-in themes are available, provided by `Serilog.Sinks.Console`
 
 * Archive of `Atlassian` jsons available [here](https://github.com/EpicMorg/atlassian-json).
 
-------
+-------------------
 
 ## Authors
 * [@kasthack](https://github.com/kasthack) - code

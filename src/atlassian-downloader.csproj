@@ -1,15 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <PublishSingleFile>true</PublishSingleFile>
+    
+    <!--publish config-->
+    <PublishSingleFile>false</PublishSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
     <PublishAot>false</PublishAot>
     <SelfContained>true</SelfContained>
+    <PublishReadyToRun>false</PublishReadyToRun>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PublishTrimmed>true</PublishTrimmed>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <TargetFramework>net6.0</TargetFramework>
+
+    <!--build props-->
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    
+    <!--package metadata-->
+    
     <PackageId>EpicMorg.Atlassian.Downloader</PackageId>
     <Authors>EpicMorg, kasthack, stam</Authors>
     <Description>Atlassian Downloader by EpicMorg</Description>
@@ -18,41 +25,39 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/EpicMorg/atlassian-downloader</RepositoryUrl>
     <PackageTags>atlassian, donwloader, epicmorg</PackageTags>
-    <AssemblyVersion>1.1.0.0</AssemblyVersion>
-    <FileVersion>1.1.0.0</FileVersion>
-    <Version>1.1.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.0.0.0</Version>
     <Copyright>EpicMorg 2023</Copyright>
     <Product>Atlassian Downloader</Product>
-    <IsPackable>true</IsPackable>
     <Company>EpicMorg</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RootNamespace>EpicMorg.Atlassian.Downloader</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-    <PackageReference Include="Serilog" Version="2.12.0" />
-    <PackageReference Include="System.CommandLine.DragonFruit" Version="0.3.0-alpha.21216.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="7.0.1-dev-10354" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="7.0.2-dev-00546" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.2.0-dev-00918" />
+    <PackageReference Include="Serilog" Version="3.1.0-dev-02078" />
+    <PackageReference Include="System.CommandLine.DragonFruit" Version="0.4.0-alpha.22272.1" />
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
     <None Include="favicon.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>
+      </PackagePath>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
 </Project>
