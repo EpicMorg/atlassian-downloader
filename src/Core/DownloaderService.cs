@@ -16,11 +16,14 @@ using System.Threading.Tasks;
 
 internal class DownloaderService : IHostedService
 {
+    private static readonly JsonSerializerOptions jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
     private readonly ILogger<DownloaderService> logger;
     private readonly DownloaderOptions options;
     private readonly HttpClient client;
     private readonly IHostApplicationLifetime hostApplicationLifetime;
-
 
     public DownloaderService(IHostApplicationLifetime hostApplicationLifetime, ILogger<DownloaderService> logger, HttpClient client, DownloaderOptions options)
     {
@@ -87,15 +90,12 @@ internal class DownloaderService : IHostedService
         this.hostApplicationLifetime.StopApplication();
     }
 
-    private async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetJson(string feedUrl, string productVersion = null, CancellationToken cancellationToken = default)
+    private async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetJson(string feedUrl, string? productVersion = null, CancellationToken cancellationToken = default)
     {
         var atlassianJson = await this.client.GetStringAsync(feedUrl, cancellationToken).ConfigureAwait(false);
         var json = atlassianJson.Trim()["downloads(".Length..^1];
-        this.logger.LogTrace($"Downloaded json: {0}", json);
-        var parsed = JsonSerializer.Deserialize<ResponseItem[]>(json, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        this.logger.LogTrace("Downloaded json: {json}", json);
+        var parsed = JsonSerializer.Deserialize<ResponseItem[]>(json, jsonOptions)!;
         this.logger.LogDebug("Found {releaseCount} releases", parsed.Length);
         var versions = parsed
             .GroupBy(a => a.Version)
@@ -111,7 +111,6 @@ internal class DownloaderService : IHostedService
 
     private async Task DownloadFilesFromFeed(string feedUrl, IDictionary<string, ResponseItem[]> versions, CancellationToken cancellationToken)
     {
-
 
         var feedDir = Path.Combine(this.options.OutputDir, feedUrl[(feedUrl.LastIndexOf('/') + 1)..feedUrl.LastIndexOf('.')]);
         this.logger.LogInformation("Download from JSON \"{feedUrl}\" started", feedUrl);
@@ -137,11 +136,9 @@ internal class DownloaderService : IHostedService
 
                 if (file.ZipUrl == null)
                 {
-                    this.logger.LogWarning($"Empty ZipUrl found for version '{version.Key}' in {feedUrl}");
+                    this.logger.LogWarning("Empty ZipUrl found for version '{version}' in {feedUrl}", version.Key, feedUrl);
                     continue;
                 }
-
-
 
                 var serverPath = file.ZipUrl.PathAndQuery;
                 var outputFile = Path.Combine(directory, serverPath[(serverPath.LastIndexOf('/') + 1)..]);
@@ -153,58 +150,64 @@ internal class DownloaderService : IHostedService
                 {
                     if (this.options.SkipFileCheck == false)
                     {
-                        this.logger.LogWarning($"File \"{outputFile}\" already exists. File sizes will be compared.");
+                        this.logger.LogWarning("File \"{outputFile}\" already exists. File sizes will be compared.", outputFile);
                         var localFileSize = new FileInfo(outputFile).Length;
-                        this.logger.LogInformation($"Size of local file is {localFileSize} bytes.");
+                        this.logger.LogInformation("Size of local file is {localFileSize} bytes.", localFileSize);
                         try
                         {
                             var httpClient = new HttpClient();
                             httpClient.DefaultRequestHeaders.Add("User-Agent", options.UserAgent);
-                            var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, file.ZipUrl));
+                            var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, file.ZipUrl), cancellationToken);
                             if (response.IsSuccessStatusCode)
                             {
                                 if (response.Content.Headers.ContentLength.HasValue)
                                 {
                                     var remoteFileSize = response.Content.Headers.ContentLength.Value;
-                                    this.logger.LogInformation($"Size of remote file is \"{remoteFileSize}\" bytes.");
+                                    this.logger.LogInformation("Size of remote file is \"{remoteFileSize}\" bytes.", remoteFileSize);
 
                                     if (remoteFileSize == localFileSize)
                                     {
-                                        this.logger.LogInformation($"Size of remote and local files and are same ({remoteFileSize} bytes and {localFileSize} bytes). Nothing to download. Operation skipped.");
+                                        this.logger.LogInformation(
+                                            "Size of remote and local files and are same ({remoteFileSize} bytes and {localFileSize} bytes). Nothing to download. Operation skipped.",
+                                            remoteFileSize,
+                                            localFileSize);
                                     }
                                     else
                                     {
-                                        this.logger.LogWarning($"Size of remote and local files and are not same ({remoteFileSize} bytes and {localFileSize} bytes). Download started.");
+                                        this.logger.LogWarning(
+                                            "Size of remote and local files and are not same ({remoteFileSize} bytes and {localFileSize} bytes). Download started.",
+                                            remoteFileSize,
+                                            localFileSize);
                                         File.Delete(outputFile);
                                         await this.DownloadFile(file, outputFile, cancellationToken).ConfigureAwait(false);
                                     }
                                 }
                                 else
                                 {
-                                    this.logger.LogWarning($"Cant get size of remote file  \"{file.ZipUrl}\". May be server not support it feature. Sorry.");
+                                    this.logger.LogWarning("Cant get size of remote file  \"{uri}\". May be server not support it feature. Sorry.", file.ZipUrl);
                                     continue;
                                 }
                             }
                             else
                             {
-                                this.logger.LogCritical($"Request execution error: \"{response.StatusCode}\". Sorry.");
+                                this.logger.LogError("Request execution error for {uri}: \"{statusCode}\". Sorry.", file.ZipUrl, response.StatusCode);
                             }
                         }
                         catch (HttpRequestException ex)
                         {
-                            this.logger.LogCritical($"HTTP request error: \"{ex.Message}\", \"{ex.StackTrace}\", \"{ex.StatusCode}\". Sorry.");
+                            this.logger.LogError(ex, "HTTP request error for {uri}: \"{message}\", \"{statusCode}\". Sorry.", file.ZipUrl, ex.Message, ex.StatusCode);
                         }
-                        }
+                    }
                     else
                     {
-                        logger.LogWarning($"File \"{outputFile}\" already exists. Download from \"{file.ZipUrl}\" skipped.");
+                        logger.LogWarning("File \"{outputFile}\" already exists. Download from \"{uri}\" skipped.", outputFile, file.ZipUrl);
                         continue;
                     }
                 }
             }
         }
 
-        this.logger.LogInformation($"All files from \"{feedUrl}\" successfully downloaded.");
+        this.logger.LogInformation("All files from \"{feedUrl}\" successfully downloaded.", feedUrl);
 
     }
 
@@ -230,13 +233,12 @@ internal class DownloaderService : IHostedService
             }
             catch (Exception removeEx)
             {
-                this.logger.LogError(removeEx, $"Failed to remove incomplete file \"{outputFile}\".");
+                this.logger.LogError(removeEx, "Failed to remove incomplete file \"{outputFile}\".", outputFile);
             }
         }
 
-        this.logger.LogInformation($"File \"{file.ZipUrl}\" successfully downloaded to \"{outputFile}\".");
+        this.logger.LogInformation("File \"{uri}\" successfully downloaded to \"{outputFile}\".", file.ZipUrl, outputFile);
     }
-
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public async Task StopAsync(CancellationToken cancellationToken) { }
