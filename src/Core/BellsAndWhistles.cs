@@ -11,13 +11,13 @@ internal class BellsAndWhistles
 {
     private static readonly string assemblyEnvironment = string.Format("[{1}, {0}]", RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant(), RuntimeInformation.FrameworkDescription);
 
-    private static readonly Assembly entryAssembly = Assembly.GetEntryAssembly();
+    private static readonly Assembly entryAssembly = Assembly.GetEntryAssembly()!;
 
-    private static readonly string assemblyVersion = entryAssembly.GetName().Version.ToString();
+    private static readonly string assemblyVersion = entryAssembly.GetName().Version!.ToString();
 
-    private static readonly string fileVersion = entryAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+    private static readonly string fileVersion = entryAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version;
 
-    private static readonly string assemblyName = entryAssembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
+    private static readonly string assemblyName = entryAssembly.GetCustomAttribute<AssemblyProductAttribute>()!.Product;
     const string assemblyBuildType =
 #if DEBUG
             "[Debug]"
@@ -31,7 +31,12 @@ internal class BellsAndWhistles
 
     public static void ShowVersionInfo(ILogger logger)
     {
-        logger.LogInformation($"{assemblyName} {assemblyVersion} {assemblyEnvironment} {assemblyBuildType}");
+        logger.LogInformation(
+            "{assemblyName} {assemblyVersion} {assemblyEnvironment} {assemblyBuildType}",
+            assemblyName,
+            assemblyVersion,
+            assemblyEnvironment,
+            assemblyBuildType);
         Console.BackgroundColor = ConsoleColor.Black;
         WriteColorLine("%╔═╦═══════════════════════════════════════════════════════════════════════════════════════╦═╗");
         WriteColorLine("%╠═╝                  .''.                                                                 %╚═%╣");
