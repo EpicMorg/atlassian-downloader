@@ -1,6 +1,9 @@
 # Atlassian Downloader - Changelog
 
 ## 2.x
+* `2.0.0.1` -  - minor update:
+    * Fix default output dir, enable nullables, fix compiler warnings #43
+    * Remove redundant parameters from publish profiles #42
 * `2.0.0.0` - migrated to `dotnet8` and updated libs. 
     * code optimized by [@kasthack](https://github.com/kasthack). 
     * reworked build scripts via `cli` and `vs`.
