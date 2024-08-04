@@ -24,6 +24,8 @@ public class Program
     /// <param name="productVersion">Override target version to download some product. Advice: Use it with "customFeed".</param>
     /// <param name="skipFileCheck">Skip compare of file sizes if a local file already exists. Existing file will be skipped to check and redownload.</param>
     /// <param name="userAgent">Set custom user agent via this feature flag.</param>
+    /// <param name="maxRetries">Set custom count of download retries.</param>
+    /// <param name="delayBetweenRetries">Set custom delay between retries (in milliseconds).</param>
     static async Task Main(
         string? outputDir = default,
         Uri[]? customFeed = null,
@@ -31,6 +33,8 @@ public class Program
         bool about = false,
         string? productVersion = null,
         bool skipFileCheck = false,
+        int maxRetries = 5,
+        int delayBetweenRetries = 2500,
         string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0") => await
         Host
             .CreateDefaultBuilder()
@@ -60,7 +64,9 @@ public class Program
                         about,
                         productVersion,
                         skipFileCheck,
-                        userAgent))
+                        userAgent,
+                        maxRetries,
+                        delayBetweenRetries))
                    .AddHttpClient())
             .RunConsoleAsync()
             .ConfigureAwait(false);

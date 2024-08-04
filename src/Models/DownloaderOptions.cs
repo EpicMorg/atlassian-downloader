@@ -8,4 +8,7 @@ public record DownloaderOptions(
     bool Version,
     string? ProductVersion,
     bool SkipFileCheck,
-    string UserAgent) { }
+    string UserAgent,
+    int MaxRetries,
+    int DelayBetweenRetries
+    ) { }

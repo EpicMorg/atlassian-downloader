@@ -213,31 +213,43 @@ internal class DownloaderService : IHostedService
 
     private async Task DownloadFile(ResponseItem file, string outputFile, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrEmpty(file.Md5))
+        for (int attempt = 1; attempt <= options.MaxRetries; attempt++)
         {
-            File.WriteAllText(outputFile + ".md5", file.Md5);
-        }
+            if (!string.IsNullOrEmpty(file.Md5))
+            {
+                File.WriteAllText(outputFile + ".md5", file.Md5);
+            }
 
-        try
-        {
-            using var outputStream = File.OpenWrite(outputFile);
-            using var request = await this.client.GetStreamAsync(file.ZipUrl, cancellationToken).ConfigureAwait(false);
-            await request.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception downloadEx)
-        {
-            this.logger.LogError(downloadEx, "Failed to download file \"{uri}\" to \"{outputFile}\".", file.ZipUrl, outputFile);
             try
             {
-                File.Delete(outputFile);
+                using var outputStream = File.OpenWrite(outputFile);
+                using var request = await this.client.GetStreamAsync(file.ZipUrl, cancellationToken).ConfigureAwait(false);
+                await request.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception removeEx)
+            catch (Exception downloadEx)
             {
-                this.logger.LogError(removeEx, "Failed to remove incomplete file \"{outputFile}\".", outputFile);
-            }
-        }
+                this.logger.LogError(downloadEx, "Attempt {attempt} failed to download file \"{uri}\" to \"{outputFile}\".", attempt, file.ZipUrl, outputFile);
 
-        this.logger.LogInformation("File \"{uri}\" successfully downloaded to \"{outputFile}\".", file.ZipUrl, outputFile);
+                if (attempt == options.MaxRetries)
+                {
+                    this.logger.LogError(downloadEx, "Failed to download file \"{uri}\" to \"{outputFile}\".", file.ZipUrl, outputFile);
+                    try
+                    {
+                        File.Delete(outputFile);
+                    }
+                    catch (Exception removeEx)
+                    {
+                        this.logger.LogError(removeEx, "Failed to remove incomplete file \"{outputFile}\".", outputFile);
+                    }
+                    throw; 
+                }
+                else
+                {
+                    await Task.Delay(options.DelayBetweenRetries, cancellationToken).ConfigureAwait(false);
+                }
+            }
+            this.logger.LogInformation("File \"{uri}\" successfully downloaded to \"{outputFile}\".", file.ZipUrl, outputFile);
+        }
     }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
