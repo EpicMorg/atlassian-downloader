@@ -2,7 +2,7 @@
 
 # Atlassian Downloader
 
-Console app written with `c#` and `dotnet8` for downloading all avalible products from `Atlassian`. Why not?
+Console app written with `c#` and `dotnet9` for downloading all avalible products from `Atlassian`. Why not?
 
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-01.png)
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-03.png)
@@ -15,7 +15,7 @@ Console app written with `c#` and `dotnet8` for downloading all avalible product
 # How to...
 
 ## ..develop
-1. preinstall `dotnet8`. Download [here](https://dotnet.microsoft.com/download/dotnet/8.0).
+1. preinstall `dotnet9`. Download [here](https://dotnet.microsoft.com/download/dotnet/8.0).
 2. preinstall `VS2022`.  Download [here](https://visualstudio.microsoft.com/vs/).
 3. `git clone` this repo.
 4. `cd` to `<repo>/src`.

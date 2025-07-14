@@ -2,16 +2,16 @@
 export DOTNET_CLI_TELEMETRY_OPTOUT=true
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
 
-dotnet publish -p:PublishProfile=win-x64 --force
-dotnet publish -p:PublishProfile=win-x86 --force
-dotnet publish -p:PublishProfile=win-arm64 --force
-dotnet publish -p:PublishProfile=osx-x64 --force
-dotnet publish -p:PublishProfile=osx-arm64 --force
-dotnet publish -p:PublishProfile=linux-x64 --force
-dotnet publish -p:PublishProfile=linux-musl-x64 --force
-dotnet publish -p:PublishProfile=linux-arm --force
-dotnet publish -p:PublishProfile=linux-arm64 --force
-dotnet publish -p:PublishProfile=linux-bionic-x64 --force
+dotnet publish -p:PublishProfile=win-x64 --net9.0
+dotnet publish -p:PublishProfile=win-x86 --net9.0
+dotnet publish -p:PublishProfile=win-arm64 --net9.0
+dotnet publish -p:PublishProfile=osx-x64 --net9.0
+dotnet publish -p:PublishProfile=osx-arm64 --net9.0
+dotnet publish -p:PublishProfile=linux-x64 --net9.0
+dotnet publish -p:PublishProfile=linux-musl-x64 --net9.0
+dotnet publish -p:PublishProfile=linux-arm --net9.0
+dotnet publish -p:PublishProfile=linux-arm64 --net9.0
+dotnet publish -p:PublishProfile=linux-bionic-x64 --net9.0
 
 rm -rfv ./bin/Release/net8.0/win-x64/publish/atlassian-downloader.pdb
 rm -rfv ./bin/Release/net8.0/win-x86/publish/atlassian-downloader.pdb
