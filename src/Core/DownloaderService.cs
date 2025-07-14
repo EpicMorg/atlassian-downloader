@@ -93,7 +93,9 @@ internal class DownloaderService : IHostedService
     private async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetJson(string feedUrl, string? productVersion = null, CancellationToken cancellationToken = default)
     {
         var atlassianJson = await this.client.GetStringAsync(feedUrl, cancellationToken).ConfigureAwait(false);
-        var json = atlassianJson.Trim()["downloads(".Length..^1];
+        const string dlPrefix = "downloads(";
+        
+        var json = atlassianJson.StartsWith(dlPrefix) ? atlassianJson.Trim()[dlPrefix.Length..^1] : atlassianJson;
         this.logger.LogTrace("Downloaded json: {json}", json);
         var parsed = JsonSerializer.Deserialize<ResponseItem[]>(json, jsonOptions)!;
         this.logger.LogDebug("Found {releaseCount} releases", parsed.Length);
