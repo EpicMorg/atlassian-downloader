@@ -1,6 +1,10 @@
 # Atlassian Downloader - Changelog
 
 ## 2.x
+* `2.0.0.3` - minor update:
+    * Updated dependencies.
+    * `dotnet9`
+    * updated to new JSON format from atlassian
 * `2.0.0.2` - minor update:
     * Added `maxRetries (default: 5)` and `delayBetweenRetries (default: 2500, milliseconds)` args, to redownload file if connection will be reset.
     * Updated dependencies.
