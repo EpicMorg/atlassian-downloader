@@ -90,6 +90,39 @@ internal class DownloaderService : IHostedService
         this.hostApplicationLifetime.StopApplication();
     }
 
+    // This new method will intelligently determine the filename
+    private async Task<string> GetActualFileNameAsync(string downloadUrl, string? pluginKey, string? version, CancellationToken cancellationToken)
+    {
+        // Try to get filename from Content-Disposition header first
+        try
+        {
+            using var headRequest = new HttpRequestMessage(HttpMethod.Head, downloadUrl);
+            var headResponse = await this.client.SendAsync(headRequest, cancellationToken);
+            headResponse.EnsureSuccessStatusCode();
+
+            if (headResponse.Content.Headers.ContentDisposition?.FileName != null)
+            {
+                // The header gives us the best possible name (e.g., "my-plugin.obr")
+                var fileName = headResponse.Content.Headers.ContentDisposition.FileName.Trim('\"');
+                if (!string.IsNullOrWhiteSpace(fileName))
+                {
+                    this.logger.LogDebug("Resolved filename from Content-Disposition header: {fileName}", fileName);
+                    return SanitizeFolderName(fileName);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // This can fail (e.g., 404, timeout, or server doesn't support HEAD), which is okay.
+            // We will just fall back to the old logic.
+            this.logger.LogDebug(ex, "HEAD request for filename failed, falling back to URL parsing.");
+        }
+
+        // Fallback to our old logic if the header is missing or the request fails
+        this.logger.LogDebug("Could not resolve filename from headers, parsing URL instead.");
+        return GetFileNameFromUrl(downloadUrl, pluginKey, version);
+    }
+
     // --- NEW LOGIC FOR PLUGIN DOWNLOADING ---
 
     private async Task HandlePluginAction(CancellationToken cancellationToken)
@@ -208,7 +241,7 @@ internal class DownloaderService : IHostedService
                     continue;
                 }
 
-                var fileName = GetFileNameFromUrl(versionDetail.Value.DownloadUrl, plugin.Key, version.Name);
+                var fileName = await GetActualFileNameAsync(versionDetail.Value.DownloadUrl, plugin.Key, version.Name, cancellationToken);
                 var outputFile = Path.Combine(versionDir, fileName);
 
                 if (File.Exists(outputFile) && this.options.SkipFileCheck)
