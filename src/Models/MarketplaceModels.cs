@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-// THIS CLASS WAS MISSING. It's for the basic info from /rest/2/addons/{addonKey}
+// Represents the top-level info for a plugin from /rest/2/addons/{addonKey}
 public class MarketplacePlugin
 {
     [JsonPropertyName("key")]
@@ -13,7 +13,7 @@ public class MarketplacePlugin
     public string? Name { get; set; }
 }
 
-// Represents the top-level response from the /versions endpoint
+// Represents the paginated response from the /versions endpoint
 public class AddonVersionCollection
 {
     [JsonPropertyName("_links")]
@@ -109,6 +109,13 @@ public class ReleaseInfo
     public string? Date { get; set; }
 }
 
+public class TextInfo
+{
+    [JsonPropertyName("releaseNotes")]
+    public string? ReleaseNotes { get; set; }
+}
+
+// Models for parsing compatibility ranges
 public class CompatibilityInfo
 {
     [JsonPropertyName("application")]
@@ -121,16 +128,25 @@ public class CompatibilityInfo
 public class HostingInfo
 {
     [JsonPropertyName("dataCenter")]
-    public object? DataCenter { get; set; }
+    public VersionRange? DataCenter { get; set; }
 
     [JsonPropertyName("server")]
-    public object? Server { get; set; }
+    public VersionRange? Server { get; set; }
 }
 
-public class TextInfo
+public class VersionRange
 {
-    [JsonPropertyName("releaseNotes")]
-    public string? ReleaseNotes { get; set; }
+    [JsonPropertyName("min")]
+    public VersionDetails? Min { get; set; }
+
+    [JsonPropertyName("max")]
+    public VersionDetails? Max { get; set; }
+}
+
+public class VersionDetails
+{
+    [JsonPropertyName("version")]
+    public string? Version { get; set; }
 }
 
 // Common helper class

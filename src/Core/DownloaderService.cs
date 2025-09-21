@@ -90,39 +90,6 @@ internal class DownloaderService : IHostedService
         this.hostApplicationLifetime.StopApplication();
     }
 
-    // This new method will intelligently determine the filename
-    private async Task<string> GetActualFileNameAsync(string downloadUrl, string? pluginKey, string? version, CancellationToken cancellationToken)
-    {
-        // Try to get filename from Content-Disposition header first
-        try
-        {
-            using var headRequest = new HttpRequestMessage(HttpMethod.Head, downloadUrl);
-            var headResponse = await this.client.SendAsync(headRequest, cancellationToken);
-            headResponse.EnsureSuccessStatusCode();
-
-            if (headResponse.Content.Headers.ContentDisposition?.FileName != null)
-            {
-                // The header gives us the best possible name (e.g., "my-plugin.obr")
-                var fileName = headResponse.Content.Headers.ContentDisposition.FileName.Trim('\"');
-                if (!string.IsNullOrWhiteSpace(fileName))
-                {
-                    this.logger.LogDebug("Resolved filename from Content-Disposition header: {fileName}", fileName);
-                    return SanitizeFolderName(fileName);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            // This can fail (e.g., 404, timeout, or server doesn't support HEAD), which is okay.
-            // We will just fall back to the old logic.
-            this.logger.LogDebug(ex, "HEAD request for filename failed, falling back to URL parsing.");
-        }
-
-        // Fallback to our old logic if the header is missing or the request fails
-        this.logger.LogDebug("Could not resolve filename from headers, parsing URL instead.");
-        return GetFileNameFromUrl(downloadUrl, pluginKey, version);
-    }
-
     // --- NEW LOGIC FOR PLUGIN DOWNLOADING ---
 
     private async Task HandlePluginAction(CancellationToken cancellationToken)
@@ -250,7 +217,17 @@ internal class DownloaderService : IHostedService
                     continue;
                 }
 
-                await this.DownloadPluginFile(versionDetail.Value.DownloadUrl, outputFile, cancellationToken);
+                try
+                {
+                    await this.DownloadPluginFile(versionDetail.Value.DownloadUrl, outputFile, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is not OperationCanceledException)
+                    {
+                        this.logger.LogError("Failed to download {pluginName} v{version} for {product}. Reason: {message}", plugin.Name, version.Name, product, ex.Message);
+                    }
+                }
             }
         }
     }
@@ -281,36 +258,48 @@ internal class DownloaderService : IHostedService
                 .Distinct()
                 .ToArray() ?? Array.Empty<string>();
 
+            var compatibilityLines = detailVersion.Compatibilities?
+                .Where(c => c.Application != null && (c.Hosting?.DataCenter != null || c.Hosting?.Server != null))
+                .Select(c =>
+                {
+                    var range = c.Hosting?.DataCenter ?? c.Hosting?.Server;
+                    var min = range?.Min?.Version;
+                    var max = range?.Max?.Version;
+                    return $"* **{c.Application.ToUpperInvariant()}**: {min} - {max}";
+                }) ?? Enumerable.Empty<string>();
+
             var converter = new Converter();
             var htmlNotes = detailVersion.Text?.ReleaseNotes ?? "No release notes provided for this version.";
             var markdownNotes = converter.Convert(htmlNotes);
 
             var readmeContent = $"""
-        # Release Notes for {plugin.Name} v{detailVersion.Name}
+            # Release Notes for {plugin.Name} v{detailVersion.Name}
 
-        ## Key Information
-        * **Plugin Key**: `{plugin.Key}`
-        * **Version**: `{detailVersion.Name}`
-        * **Release Date**: `{detailVersion.Release?.Date ?? "N/A"}`
-        * **Compatible Products**: `{string.Join(", ", compatibleProducts)}`
+            ## Key Information
+            * **Plugin Key**: `{plugin.Key}`
+            * **Version**: `{detailVersion.Name}`
+            * **Release Date**: `{detailVersion.Release?.Date ?? "N/A"}`
 
-        ## Release Notes
-        {markdownNotes}
-        """;
+            ## Compatibility
+            {string.Join("\n", compatibilityLines)}
+
+            ## Release Notes
+            {markdownNotes}
+            """;
 
             return (downloadUrl, compatibleProducts, readmeContent);
         }
-        // MODIFIED: Added specific catch for cancellation
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound || httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            this.logger.LogWarning("Could not get details for version {versionName} (HTTP {statusCode}). Skipping.", version.Name, httpEx.StatusCode);
+            return null;
+        }
         catch (OperationCanceledException)
         {
-            // This is not an error. It's an intentional stop request from the user.
-            // We just let the exception bubble up to the higher-level handler in HandlePluginAction,
-            // which will log a clean warning and stop the main loop.
             throw;
         }
         catch (Exception ex)
         {
-            // This will now only catch REAL errors (network issues, bad JSON, etc.)
             this.logger.LogError(ex, "Error getting detailed info for version {version}", version.Name);
             return null;
         }
@@ -323,6 +312,58 @@ internal class DownloaderService : IHostedService
             name = name.Replace(c, '_');
         }
         return name.Trim();
+    }
+
+    private async Task<string> GetActualFileNameAsync(string downloadUrl, string? pluginKey, string? version, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var headRequest = new HttpRequestMessage(HttpMethod.Head, downloadUrl);
+            var headResponse = await this.client.SendAsync(headRequest, cancellationToken);
+            headResponse.EnsureSuccessStatusCode();
+
+            if (headResponse.Content.Headers.ContentDisposition?.FileName != null)
+            {
+                var fileName = headResponse.Content.Headers.ContentDisposition.FileName.Trim('\"');
+                if (!string.IsNullOrWhiteSpace(fileName))
+                {
+                    this.logger.LogDebug("Resolved filename from Content-Disposition header: {fileName}", fileName);
+                    return SanitizeFolderName(fileName);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            this.logger.LogDebug(ex, "HEAD request for filename failed, falling back to URL parsing.");
+        }
+
+        this.logger.LogDebug("Could not resolve filename from headers, parsing URL instead.");
+        return GetFileNameFromUrl(downloadUrl, pluginKey, version);
+    }
+
+    private static string GetFileNameFromUrl(string downloadUrl, string? pluginKey, string? version)
+    {
+        try
+        {
+            var uri = new Uri(downloadUrl);
+            var urlFileName = Path.GetFileName(uri.LocalPath);
+
+            if (!string.IsNullOrWhiteSpace(urlFileName) && Path.HasExtension(urlFileName))
+            {
+                return urlFileName;
+            }
+
+            if (uri.Host == "marketplace.atlassian.com" && (uri.LocalPath.StartsWith("/files/") || uri.LocalPath.StartsWith("/download/")))
+            {
+                return $"{pluginKey ?? "plugin"}-{version ?? "unknown"}.jar";
+            }
+
+            return !string.IsNullOrWhiteSpace(urlFileName) ? urlFileName : $"{pluginKey ?? "plugin"}-{version ?? "unknown"}.jar";
+        }
+        catch
+        {
+            return $"{pluginKey ?? "plugin"}-{version ?? "unknown"}.jar";
+        }
     }
 
     private async Task DownloadPluginFile(string downloadUrl, string outputFile, CancellationToken cancellationToken)
@@ -379,31 +420,6 @@ internal class DownloaderService : IHostedService
                     await Task.Delay(options.DelayBetweenRetries, cancellationToken).ConfigureAwait(false);
                 }
             }
-        }
-    }
-
-    private static string GetFileNameFromUrl(string downloadUrl, string? pluginKey, string? version)
-    {
-        try
-        {
-            var uri = new Uri(downloadUrl);
-            var urlFileName = Path.GetFileName(uri.LocalPath);
-
-            if (!string.IsNullOrWhiteSpace(urlFileName) && Path.HasExtension(urlFileName))
-            {
-                return urlFileName;
-            }
-
-            if (uri.Host == "marketplace.atlassian.com" && (uri.LocalPath.StartsWith("/files/") || uri.LocalPath.StartsWith("/download/")))
-            {
-                return $"{pluginKey ?? "plugin"}-{version ?? "unknown"}.jar";
-            }
-
-            return !string.IsNullOrWhiteSpace(urlFileName) ? urlFileName : $"{pluginKey ?? "plugin"}-{version ?? "unknown"}.jar";
-        }
-        catch
-        {
-            return $"{pluginKey ?? "plugin"}-{version ?? "unknown"}.jar";
         }
     }
 
@@ -468,8 +484,6 @@ internal class DownloaderService : IHostedService
                         var localFileSize = new FileInfo(outputFile).Length;
                         this.logger.LogInformation("Size of local file is {localFileSize} bytes.", localFileSize);
 
-                        // NOTE: This part creates a new HttpClient, which is not ideal, but it's from the original code.
-                        // For consistency, we leave it as is. The new plugin downloader uses the shared client.
                         var httpClient = new HttpClient();
                         httpClient.DefaultRequestHeaders.Add("User-Agent", options.UserAgent);
                         var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, file.ZipUrl), cancellationToken);
