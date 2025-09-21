@@ -1,4 +1,4 @@
-﻿namespace EpicMorg.Atlassian.Downloader;
+namespace EpicMorg.Atlassian.Downloader;
 
 using EpicMorg.Atlassian.Downloader.Core;
 
@@ -26,6 +26,7 @@ public class Program
     /// <param name="userAgent">Set custom user agent via this feature flag.</param>
     /// <param name="maxRetries">Set custom count of download retries.</param>
     /// <param name="delayBetweenRetries">Set custom delay between retries (in milliseconds).</param>
+    /// <param name="pluginId">Plugin ID from Atlassian Marketplace to download (only used with Plugin action).</param>
     static async Task Main(
         string? outputDir = default,
         Uri[]? customFeed = null,
@@ -35,7 +36,8 @@ public class Program
         bool skipFileCheck = false,
         int maxRetries = 5,
         int delayBetweenRetries = 2500,
-        string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0") => await
+        string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0",
+        string? pluginId = null) => await
         Host
             .CreateDefaultBuilder()
             .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables())
@@ -66,7 +68,8 @@ public class Program
                         skipFileCheck,
                         userAgent,
                         maxRetries,
-                        delayBetweenRetries))
+                        delayBetweenRetries,
+                        pluginId))
                    .AddHttpClient())
             .RunConsoleAsync()
             .ConfigureAwait(false);
