@@ -10,5 +10,7 @@ public record DownloaderOptions(
     bool SkipFileCheck,
     string UserAgent,
     int MaxRetries,
-    int DelayBetweenRetries
-    ) { }
+    int DelayBetweenRetries,
+    string? PluginId
+    )
+{ }

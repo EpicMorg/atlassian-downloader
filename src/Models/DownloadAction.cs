@@ -1,4 +1,4 @@
-﻿namespace EpicMorg.Atlassian.Downloader;
+namespace EpicMorg.Atlassian.Downloader;
 
 public enum DownloadAction
 {
@@ -18,4 +18,8 @@ public enum DownloadAction
     /// Print feed JSONs to stdout and exit
     /// </summary>
     ShowRawJson,
+    /// <summary>
+    /// Download plugin files from Atlassian Marketplace
+    /// </summary>
+    Plugin,
 }
