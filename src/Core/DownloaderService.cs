@@ -253,22 +253,31 @@ internal class DownloaderService : IHostedService
             var markdownNotes = converter.Convert(htmlNotes);
 
             var readmeContent = $"""
-            # Release Notes for {plugin.Name} v{detailVersion.Name}
+        # Release Notes for {plugin.Name} v{detailVersion.Name}
 
-            ## Key Information
-            * **Plugin Key**: `{plugin.Key}`
-            * **Version**: `{detailVersion.Name}`
-            * **Release Date**: `{detailVersion.Release?.Date ?? "N/A"}`
-            * **Compatible Products**: `{string.Join(", ", compatibleProducts)}`
+        ## Key Information
+        * **Plugin Key**: `{plugin.Key}`
+        * **Version**: `{detailVersion.Name}`
+        * **Release Date**: `{detailVersion.Release?.Date ?? "N/A"}`
+        * **Compatible Products**: `{string.Join(", ", compatibleProducts)}`
 
-            ## Release Notes
-            {markdownNotes}
-            """;
+        ## Release Notes
+        {markdownNotes}
+        """;
 
             return (downloadUrl, compatibleProducts, readmeContent);
         }
+        // MODIFIED: Added specific catch for cancellation
+        catch (OperationCanceledException)
+        {
+            // This is not an error. It's an intentional stop request from the user.
+            // We just let the exception bubble up to the higher-level handler in HandlePluginAction,
+            // which will log a clean warning and stop the main loop.
+            throw;
+        }
         catch (Exception ex)
         {
+            // This will now only catch REAL errors (network issues, bad JSON, etc.)
             this.logger.LogError(ex, "Error getting detailed info for version {version}", version.Name);
             return null;
         }
