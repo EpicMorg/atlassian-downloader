@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     
     <!--publish config-->
@@ -57,6 +57,9 @@
       <PackagePath>
       </PackagePath>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Atlassian.Downloader.Core\Atlassian.Downloader.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.json">

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "atlassian-downloader": {
+      "commandName": "Project",
+      "commandLineArgs": " --output-dir \"S:\\Vendors\\Atlassian\""
+    }
+  }
+}
