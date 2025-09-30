@@ -1,76 +1,130 @@
-namespace EpicMorg.Atlassian.Downloader;
+namespace EpicMorg.Atlassian.Downloader.ConsoleApp;
 
+using atlassian_downloader;
 using EpicMorg.Atlassian.Downloader.Core;
-
-using Microsoft.Extensions.Configuration;
+using EpicMorg.Atlassian.Downloader.Core.Models;
+using EpicMorg.Atlassian.Downloader.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.Extensions.Options;
 using Serilog;
-
 using System;
+using System.Linq; // ADDED
+using System.Threading;
 using System.Threading.Tasks;
 
 public class Program
 {
-    /// <summary>
-    /// Atlassian archive downloader. See https://github.com/EpicMorg/atlassian-downloader for more info
-    /// </summary>
-    /// <param name="action">Action to perform</param>
-    /// <param name="outputDir">Override output directory to download</param>
-    /// <param name="customFeed">Override URIs to import</param>
-    /// <param name="about">Show credits banner</param>
-    /// <param name="productVersion">Override target version to download some product. Advice: Use it with "customFeed".</param>
-    /// <param name="skipFileCheck">Skip compare of file sizes if a local file already exists. Existing file will be skipped to check and redownload.</param>
-    /// <param name="userAgent">Set custom user agent via this feature flag.</param>
-    /// <param name="maxRetries">Set custom count of download retries.</param>
-    /// <param name="delayBetweenRetries">Set custom delay between retries (in milliseconds).</param>
-    /// <param name="pluginId">Plugin ID from Atlassian Marketplace to download (only used with Plugin action).</param>
-    static async Task Main(
-        string? outputDir = default,
-        Uri[]? customFeed = null,
-        DownloadAction action = DownloadAction.Download,
-        bool about = false,
-        string? productVersion = null,
-        bool skipFileCheck = false,
-        int maxRetries = 5,
-        int delayBetweenRetries = 2500,
-        string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0",
-        string? pluginId = null) => await
-        Host
-            .CreateDefaultBuilder()
-            .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables())
-            .ConfigureAppConfiguration((ctx, configuration) =>
-                configuration
-                    .SetBasePath(System.AppContext.BaseDirectory)
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables())
-            .ConfigureServices((ctx, services) => services
-                   .AddOptions()
-                   .AddLogging(builder =>
-                   {
-                       Log.Logger = new LoggerConfiguration()
-                              .ReadFrom.Configuration(ctx.Configuration)
-                              .CreateLogger();
-                       _ = builder
-                            .ClearProviders()
-                            .AddSerilog(dispose: true);
-                   })
-                   .AddHostedService<DownloaderService>()
-                   .AddSingleton(new DownloaderOptions(
-                        outputDir ?? Environment.CurrentDirectory,
-                        customFeed,
-                        action,
-                        about,
-                        productVersion,
-                        skipFileCheck,
-                        userAgent,
-                        maxRetries,
-                        delayBetweenRetries,
-                        pluginId))
-                   .AddHttpClient())
-            .RunConsoleAsync()
-            .ConfigureAwait(false);
+    static async Task Main(string[] args)
+    {
+        await Host.CreateDefaultBuilder(args)
+            .ConfigureServices((hostContext, services) =>
+            {
+                services.AddHttpClient<AtlassianClient>();
+                services.Configure<DownloaderOptions>(hostContext.Configuration);
+                services.AddHostedService<Worker>();
+            })
+            .UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration))
+            .RunConsoleAsync();
+    }
+}
+
+public class Worker : IHostedService
+{
+    private readonly ILogger<Worker> _logger;
+    private readonly IHostApplicationLifetime _appLifetime;
+    private readonly AtlassianClient _atlassianClient;
+    private readonly DownloaderOptions _options;
+
+    public Worker(
+        ILogger<Worker> logger,
+        IHostApplicationLifetime appLifetime,
+        AtlassianClient atlassianClient,
+        IOptions<DownloaderOptions> options)
+    {
+        _logger = logger;
+        _appLifetime = appLifetime;
+        _atlassianClient = atlassianClient;
+        _options = options.Value;
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        BellsAndWhistles.ShowVersionInfo(_logger);
+
+        try
+        {
+            var settings = new DownloaderSettings
+            {
+                OutputDir = _options.OutputDir,
+                SkipFileCheck = _options.SkipFileCheck,
+                UserAgent = _options.UserAgent,
+                MaxRetries = _options.MaxRetries,
+                DelayBetweenRetries = _options.DelayBetweenRetries,
+                CustomFeed = _options.CustomFeed,
+                ProductVersion = _options.ProductVersion
+            };
+
+            switch (_options.Action)
+            {
+                case DownloadAction.Plugin:
+                    if (string.IsNullOrWhiteSpace(_options.PluginId))
+                    {
+                        _logger.LogError("Action 'Plugin' requires a --plugin-id argument.");
+                    }
+                    else
+                    {
+                        await _atlassianClient.DownloadPluginAsync(_options.PluginId, settings, cancellationToken);
+                    }
+                    break;
+
+                case DownloadAction.Download:
+                    // MODIFIED: Calling the specific download method
+                    await _atlassianClient.DownloadProductsAsync(settings, cancellationToken);
+                    break;
+
+                // Logic for listing actions is now correctly handled here in the UI layer
+                case DownloadAction.ListURLs:
+                case DownloadAction.ListVersions:
+                case DownloadAction.ShowRawJson:
+                    var feedUrls = _atlassianClient.GetProductFeedUrls(settings);
+                    foreach (var feedUrl in feedUrls)
+                    {
+                        var (json, versions) = await _atlassianClient.GetProductDataAsync(feedUrl, settings, cancellationToken);
+                        if (_options.Action == DownloadAction.ShowRawJson) Console.Out.WriteLine(json);
+                        else if (_options.Action == DownloadAction.ListVersions)
+                        {
+                            foreach (var v in versions.Keys) Console.Out.WriteLine(v);
+                        }
+                        else if (_options.Action == DownloadAction.ListURLs)
+                        {
+                            foreach (var url in versions.SelectMany(v => v.Value).Select(f => f.ZipUrl))
+                            {
+                                if (url != null) Console.Out.WriteLine(url);
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is not OperationCanceledException)
+            {
+                _logger.LogCritical(ex, "An unhandled exception occurred during execution.");
+            }
+        }
+        finally
+        {
+            _logger.LogInformation("Execution finished. Application will now shut down.");
+            _appLifetime.StopApplication();
+        }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
 }
