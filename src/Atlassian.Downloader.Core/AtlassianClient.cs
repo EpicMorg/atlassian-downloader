@@ -113,19 +113,33 @@ public class AtlassianClient
         {
             cancellationToken.ThrowIfCancellationRequested();
             _logger.LogDebug("Fetching versions from: {url}", nextUrl);
-            var responseJson = await _client.GetStringAsync(nextUrl, cancellationToken).ConfigureAwait(false);
-            var page = JsonSerializer.Deserialize<AddonVersionCollection>(responseJson, jsonOptions);
 
-            if (page?.Embedded?.Versions != null)
+            try
             {
-                allVersions.AddRange(page.Embedded.Versions);
-            }
+                var responseJson = await _client.GetStringAsync(nextUrl, cancellationToken).ConfigureAwait(false);
+                var page = JsonSerializer.Deserialize<AddonVersionCollection>(responseJson, jsonOptions);
 
-            nextUrl = page?.Links?.Next?.Href;
-            if (nextUrl != null && !nextUrl.StartsWith("http"))
-            {
-                nextUrl = $"https://marketplace.atlassian.com{nextUrl}";
+                if (page?.Embedded?.Versions != null)
+                {
+                    allVersions.AddRange(page.Embedded.Versions);
+                }
+
+                // Prepare URL for the next iteration
+                nextUrl = page?.Links?.Next?.Href;
+                if (nextUrl != null && !nextUrl.StartsWith("http"))
+                {
+                    nextUrl = $"https://marketplace.atlassian.com{nextUrl}";
+                }
             }
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // This is an expected "error" if the pluginId is invalid.
+                // Log a clear message and break the loop.
+                _logger.LogError("Plugin with ID '{pluginId}' not found on Atlassian Marketplace (404).", pluginId);
+                nextUrl = null; // This will stop the do-while loop
+            }
+            // All other exceptions (network errors, other HTTP errors) will bubble up and be handled
+            // by the top-level try-catch, which is the correct behavior.
 
         } while (!string.IsNullOrWhiteSpace(nextUrl));
 
@@ -361,6 +375,16 @@ public class AtlassianClient
                 await request.CopyToAsync(outputStream, cancellationToken).ConfigureAwait(false);
 
                 _logger.LogInformation("File successfully downloaded to {outputFile}", outputFile);
+                return; // Success, exit the method
+            }
+            // MODIFIED: Added specific catch for 404/400 errors
+            catch (HttpRequestException httpEx) when (httpEx.StatusCode == System.Net.HttpStatusCode.NotFound || httpEx.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                _logger.LogWarning("Download link for {file} is broken or unavailable (HTTP {statusCode}). Skipping this file.", outputFile, httpEx.StatusCode);
+
+                // This is a final failure for this file. We should not retry. Exit the method.
+                // First, ensure the failed partial file is deleted.
+                try { if (File.Exists(outputFile)) File.Delete(outputFile); } catch { /* Ignore */ }
                 return;
             }
             catch (OperationCanceledException)
