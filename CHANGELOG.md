@@ -1,6 +1,14 @@
 # Atlassian Downloader - Changelog
 
 ## 2.x
+
+* `2.0.0.5` - technical update:
+    * Splitted core logic to standalone library,
+    * cleanup code.
+* `2.0.0.4` - update:
+    * Added support for downloading marketplace plugins
+    * updated httpClient code
+    * Updated dependencies.
 * `2.0.0.3` - minor update:
     * Updated dependencies.
     * `dotnet9`
