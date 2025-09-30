@@ -45,7 +45,7 @@ internal class BellsAndWhistles
         WriteColorLine("%║               .;cccccc;.             !╔══════════════════════════════════════════════╗     %║");
         WriteColorLine($"%║               .:ccccccc;.            !║    {assemblyName}                      !║     %║");
         WriteColorLine("%║               'ccccccccc;.           !╠══════════════════════════════════════════════╣     %║");
-        WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kasthack                         !║     %║");
+        WriteColorLine("%║               ,cccccccccc;.          !║    &Code:    @kasthack, @stam                  !║     %║");
         WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
         WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
         WriteColorLine($"%║         .',,'..;cccccccccccc;.       !║    &Version: {fileVersion}                          !║     %║");
