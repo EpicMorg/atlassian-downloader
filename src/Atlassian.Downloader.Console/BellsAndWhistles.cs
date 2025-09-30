@@ -1,4 +1,4 @@
-﻿namespace EpicMorg.Atlassian.Downloader.Models;
+﻿namespace atlassian_downloader;
 
 using System;
 using System.Collections.Generic;
