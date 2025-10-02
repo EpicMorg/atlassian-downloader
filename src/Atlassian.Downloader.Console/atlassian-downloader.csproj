@@ -11,7 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EpicMorg.Atlassian.Downloader" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
@@ -20,11 +19,43 @@
 		<PackageReference Include="System.CommandLine.DragonFruit" Version="0.4.0-alpha.22272.1" />
 	</ItemGroup>
 
+	<ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
+		<ProjectReference Include="..\Atlassian.Downloader.Core\Atlassian.Downloader.Core.csproj" />
+	</ItemGroup>
+	<ItemGroup Condition=" '$(Configuration)' == 'Release' ">
+		<PackageReference Include="EpicMorg.Atlassian.Downloader" Version="1.0.0.0" />
+	</ItemGroup>
 
   <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+	<Target Name="SignBuildOutput" AfterTargets="Build">
+		<PropertyGroup>
+			<CertificateThumbprint>3BAA227AD0DBA8DB55D0EFA14B74AA56B689601D</CertificateThumbprint>
+			<TimestampServerUrl>http://timestamp.digicert.com</TimestampServerUrl>
+			<FileToSign>$(OutputPath)$(AssemblyName).exe</FileToSign>
+		</PropertyGroup>
+
+		<Message Text="Signing build output: $(FileToSign)" Importance="high" Condition=" '$(Configuration)' == 'Release' and Exists('$(FileToSign)')" />
+
+		<Exec Command="signtool.exe sign /sm /sha1 &quot;$(CertificateThumbprint)&quot; /tr &quot;$(TimestampServerUrl)&quot; /td sha256 /fd sha256 &quot;$(FileToSign)&quot;"
+          Condition=" '$(Configuration)' == 'Release' and Exists('$(FileToSign)')" />
+	</Target>
+
+	<Target Name="SignPublishOutput" AfterTargets="Publish">
+		<PropertyGroup>
+			<CertificateThumbprint>3BAA227AD0DBA8DB55D0EFA14B74AA56B689601D</CertificateThumbprint>
+			<TimestampServerUrl>http://timestamp.digicert.com</TimestampServerUrl>
+			<FileToSign>$(PublishDir)$(AssemblyName).exe</FileToSign>
+		</PropertyGroup>
+
+		<Message Text="Signing published output: $(FileToSign)" Importance="high" Condition=" '$(Configuration)' == 'Release' and Exists('$(FileToSign)')" />
+
+		<Exec Command="signtool.exe sign /sm /sha1 &quot;$(CertificateThumbprint)&quot; /tr &quot;$(TimestampServerUrl)&quot; /td sha256 /fd sha256 &quot;$(FileToSign)&quot;"
+          Condition=" '$(Configuration)' == 'Release' and Exists('$(FileToSign)')" />
+	</Target>
 
 </Project>
