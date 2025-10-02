@@ -4,6 +4,8 @@
 
 * `2.0.0.5` - technical update:
     * Splitted core logic to standalone library,
+	* reworked build scripts,
+	* added code signing,
     * cleanup code.
 * `2.0.0.4` - update:
     * Added support for downloading marketplace plugins
