@@ -41,18 +41,35 @@ $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
 Write-Host "=================================================="
 Write-Host "Processing Atlassian.Downloader.Core library..." -ForegroundColor Magenta
 
-# The 'dotnet pack' command will automatically trigger a 'Build'.
-# The signing target inside the .csproj will run after the build and before packing.
-Write-Host "Building, signing, and packing Core library..."
+# Step 1: Build the project. This will trigger signing the DLL and creating the .nupkg file.
+Write-Host "Building, signing DLL, and creating NuGet package..."
 Invoke-Expression "dotnet build $CoreProjectFile -c $Configuration"
-#Invoke-Expression "dotnet nuget sign --certificate-fingerprint $Sha256Fingerprint --timestamper $TimeStampServer --overwrite --verbosity d $CoreBinReleaseNugetFile"
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "ERROR: dotnet pack failed for Core library. Aborting." -ForegroundColor Red
-    return # Stop the script if the core library fails
+    Write-Host "ERROR: dotnet build failed for Core library. Aborting." -ForegroundColor Red
+    return
+}
+
+# Step 2: Find the most recently created .nupkg file in the output directory.
+Write-Host "Searching for the created NuGet package..."
+$nupkgFile = Get-ChildItem -Path $CoreBinReleaseFolder -Recurse -Filter "*.nupkg" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+if (-not $nupkgFile) {
+    Write-Host "ERROR: Could not find any .nupkg file after the build." -ForegroundColor Red
+    return
+}
+
+$nupkgPath = $nupkgFile.FullName
+Write-Host "Found package: $nupkgPath" -ForegroundColor Cyan
+
+# Step 3: Sign the package using the exact path we found.
+Write-Host "Signing NuGet package..."
+dotnet nuget sign "$nupkgPath" --certificate-fingerprint $sha256Fingerprint --timestamper $TimeStampServer --overwrite
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: dotnet nuget sign failed for Core library. Aborting." -ForegroundColor Red
+    return
 }
 
 Write-Host "Core library processed successfully." -ForegroundColor Green
-
 
 # ==================================================
 # STAGE 2: Publish and Package the Console Application
@@ -60,28 +77,31 @@ Write-Host "Core library processed successfully." -ForegroundColor Green
 Write-Host "=================================================="
 Write-Host "Processing Atlassian.Downloader.Console application..." -ForegroundColor Magenta
 
-# Loop through each runtime and perform all actions for the console app
 foreach ($rid in $runtimes) {
     Write-Host "--------------------------------------------------"
     Write-Host "Processing Runtime: $rid" -ForegroundColor Yellow
 
-    # --- Standard Self-Contained Build (Default Archive) ---
+    # --- Standard Self-Contained Build ---
     Write-Host "Starting Standard Self-Contained build..." -ForegroundColor Cyan
-    $publishDirDefault = Join-Path $ConsoleProjectFolder "bin\$Configuration\$Framework\$rid\publish-self-contained"
-    $archiveNameDefault = Join-Path $ConsoleProjectFolder "bin\$ConsoleProjectName-$Framework-$rid.zip"
     
-    Invoke-Expression "dotnet publish $ConsoleProjectFile -c $Configuration --runtime $rid -o $publishDirDefault --force"
-    if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: dotnet publish (Standard) failed for $rid." -ForegroundColor Red; continue }
+    # MODIFIED: Paths are now absolute, constructed from the script's root location
+    $publishDir = Join-Path $PSScriptRoot $ConsoleProjectFolder "bin\$Configuration\$Framework\$rid\publish"
+    $archiveName = Join-Path $PSScriptRoot $ConsoleProjectFolder "bin\$ConsoleProjectName-$Framework-$rid.zip"
     
-    # Cleanup and Archiving
-    Remove-Item (Join-Path $publishDirDefault "*.pdb") -ErrorAction SilentlyContinue
-    Push-Location $publishDirDefault
-    7z a -tzip -mx5 -r -aoa $archiveNameDefault * | Out-Null
-    Pop-Location
-    if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: 7-Zip (Standard) failed for $rid." -ForegroundColor Red }
+    Invoke-Expression "dotnet publish $ConsoleProjectFile -c $Configuration --runtime $rid -p:SelfContained=true -p:PublishTrimmed=false -p:PublishAot=false -p:PublishSingleFile=false -o $publishDir --force"
+    if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: dotnet publish failed for $rid." -ForegroundColor Red; continue }
     
-    Write-Host "Successfully processed Standard build for $rid." -ForegroundColor Green
-
+    Remove-Item (Join-Path $publishDir "*.pdb") -ErrorAction SilentlyContinue
+    New-Item -Path (Join-Path $publishDir "createdump.exe.ignore") -ItemType File -Force | Out-Null
+		
+    Write-Host "Creating archive: $archiveName"
+    Push-Location $publishDir # Temporarily enter the publish directory
+    7z a -tzip -mx5 -r -aoa $archiveName * | Out-Null # Archive its contents (*)
+    Pop-Location # Go back
+    if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: 7-Zip failed for $rid." -ForegroundColor Red }
+    
+    Write-Host "Successfully processed build for $rid." -ForegroundColor Green
+    
     # --- Native AOT Build (Optional) ---
     if ($Aot) {
         Write-Host "--------------------------------------------------"
@@ -89,7 +109,7 @@ foreach ($rid in $runtimes) {
         $publishDirAot = Join-Path $ConsoleProjectFolder "bin\$Configuration\$Framework\$rid\publish-aot"
         $archiveNameAot = Join-Path $ConsoleProjectFolder "bin\$ConsoleProjectName-$Framework-$rid-aot.zip"
         
-        Invoke-Expression "dotnet publish $ConsoleProjectFile -c $Configuration --runtime $rid -p:PublishAot=true -o $publishDirAot --force"
+        Invoke-Expression "dotnet publish $ConsoleProjectFile -c $Configuration --runtime $rid -p:SelfContained=false -p:PublishTrimmed=false -p:PublishAot=true -p:PublishSingleFile=false -o $publishDirAot --force"
         if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: dotnet publish (AOT) failed for $rid." -ForegroundColor Red; continue }
 
         Remove-Item (Join-Path $publishDirAot "*.pdb") -ErrorAction SilentlyContinue
