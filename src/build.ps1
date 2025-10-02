@@ -10,6 +10,8 @@ param (
 # All settings are in one place for easy updates.
 $CoreProjectFolder = "Atlassian.Downloader.Core"
 $CoreProjectFile = Join-Path $CoreProjectFolder "Atlassian.Downloader.Core.csproj"
+$CoreBinReleaseFolder = Join-Path $CoreProjectFolder "bin" $Configuration
+$CoreBinReleaseNugetFile = Join-Path $CoreBinReleaseFolder "*.nupkg"
 
 $ConsoleProjectName = "atlassian-downloader"
 $ConsoleProjectFolder = "Atlassian.Downloader.Console"
@@ -17,6 +19,10 @@ $ConsoleProjectFile = Join-Path $ConsoleProjectFolder "$ConsoleProjectName.cspro
 
 $Configuration = "Release"
 $Framework = "net9.0"
+
+$sha1Thumbprint = "3BAA227AD0DBA8DB55D0EFA14B74AA56B689601D"  
+$sha256Fingerprint = "678456D26F89DF46A2AE8522825C157A6F9B937E890BBB5E6D51D1A2CBBD8702"
+$TimeStampServer = "http://timestamp.digicert.com"
 
 $runtimes = @(
     "win-x64", "win-x86", "win-arm64",
@@ -38,7 +44,8 @@ Write-Host "Processing Atlassian.Downloader.Core library..." -ForegroundColor Ma
 # The 'dotnet pack' command will automatically trigger a 'Build'.
 # The signing target inside the .csproj will run after the build and before packing.
 Write-Host "Building, signing, and packing Core library..."
-Invoke-Expression "dotnet pack $CoreProjectFile -c $Configuration"
+Invoke-Expression "dotnet build $CoreProjectFile -c $Configuration"
+#Invoke-Expression "dotnet nuget sign --certificate-fingerprint $Sha256Fingerprint --timestamper $TimeStampServer --overwrite --verbosity d $CoreBinReleaseNugetFile"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: dotnet pack failed for Core library. Aborting." -ForegroundColor Red
     return # Stop the script if the core library fails
