@@ -62,8 +62,8 @@ $nupkgPath = $nupkgFile.FullName
 Write-Host "Found package: $nupkgPath" -ForegroundColor Cyan
 
 # Step 3: Sign the package using the exact path we found.
-Write-Host "Signing NuGet package..."
-dotnet nuget sign "$nupkgPath" --certificate-fingerprint $sha256Fingerprint --timestamper $TimeStampServer --overwrite
+Write-Host "(SKIPPING) Signing NuGet package..."
+#dotnet nuget sign "$nupkgPath" --certificate-fingerprint $sha256Fingerprint --timestamper $TimeStampServer --overwrite
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: dotnet nuget sign failed for Core library. Aborting." -ForegroundColor Red
     return
