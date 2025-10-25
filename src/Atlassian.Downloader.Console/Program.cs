@@ -2,13 +2,14 @@
 using EpicMorg.Atlassian.Downloader.ConsoleApp;
 using EpicMorg.Atlassian.Downloader.Core;
 using EpicMorg.Atlassian.Downloader.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System;
 using System.Threading.Tasks;
 
-namespace EpicMorg.Atlassian.Downloader; // Keeping your original namespace
+namespace EpicMorg.Atlassian.Downloader;
 
 public class Program
 {
@@ -40,9 +41,13 @@ public class Program
         );
 
         await Host.CreateDefaultBuilder()
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                config.SetBasePath(AppContext.BaseDirectory);
+            })
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddSingleton(options); // Register the created options object
+                services.AddSingleton(options);
                 services.AddHttpClient<AtlassianClient>();
                 services.AddHostedService<Worker>();
             })
