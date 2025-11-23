@@ -2,6 +2,14 @@
 
 ## 2.x
 
+* `2.0.0.7` - technical update:
+    * added delays
+	* added randomazin useragents
+	* updated libs
+	* switched to `dotnet10`
+* `2.0.0.6` - technical update:
+    * backported shim-fix for choco runs
+    * updated libs
 * `2.0.0.5` - technical update:
     * Splitted core logic to standalone library,
 	* reworked build scripts,

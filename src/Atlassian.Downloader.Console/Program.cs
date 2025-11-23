@@ -23,7 +23,11 @@ public class Program
         int maxRetries = 5,
         int delayBetweenRetries = 2500,
         Uri[]? customFeed = null,
-        bool about = false 
+        bool about = false,
+        bool randomUserAgent = false,
+        bool randomDelay = false,
+        int minDelay = 300,
+        int maxDelay = 10000
         )
     {
         // Manually create the options object from the parsed parameters
@@ -37,7 +41,10 @@ public class Program
             userAgent,
             maxRetries,
             delayBetweenRetries,
-            pluginId
+            pluginId,
+            randomDelay,
+            minDelay,
+            maxDelay
         );
 
         await Host.CreateDefaultBuilder()

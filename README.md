@@ -15,7 +15,7 @@ Console app written with `c#` and `dotnet9` for downloading all avalible product
 # How to...
 
 ## ..develop
-1. preinstall `dotnet9`. Download [here](https://dotnet.microsoft.com/download/dotnet/8.0).
+1. preinstall `dotnet10`. Download [here](https://dotnet.microsoft.com/download/dotnet/10.0).
 2. preinstall `VS2022`.  Download [here](https://visualstudio.microsoft.com/vs/).
 3. `git clone` this repo.
 4. `cd` to `<repo>/src`.

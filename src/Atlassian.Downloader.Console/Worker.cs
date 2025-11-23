@@ -53,7 +53,10 @@ public class Worker : IHostedService
                 MaxRetries = _options.MaxRetries,
                 DelayBetweenRetries = _options.DelayBetweenRetries,
                 CustomFeed = _options.CustomFeed,
-                ProductVersion = _options.ProductVersion
+                ProductVersion = _options.ProductVersion,
+                RandomizeDelay = _options.RandomDelay,
+                MinDelay = _options.MinDelay,
+                MaxDelay = _options.MaxDelay
             };
 
             switch (_options.Action)
