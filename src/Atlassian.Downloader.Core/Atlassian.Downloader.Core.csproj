@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-		<TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net10.0;net9.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
 
     <PackageId>EpicMorg.Atlassian.Downloader</PackageId>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <Authors>EpicMorg, kasthack, stam, EpicMorgDev</Authors>
     <Description>Core library for downloading Atlassian products and plugins.</Description>
     <PackageProjectUrl>https://github.com/EpicMorg/atlassian-downloader</PackageProjectUrl>
@@ -50,9 +50,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
-    <PackageReference Include="ReverseMarkdown" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageReference Include="ReverseMarkdown" Version="4.7.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,8 +70,7 @@
 
 		<Message Text="Signing library output: $(TargetPath)" Importance="high" Condition=" '$(Configuration)' == 'Release' " />
 
-		<Exec Command="signtool.exe sign /sm /sha1 &quot;$(CertificateThumbprint)&quot; /tr &quot;$(TimestampServerUrl)&quot; /td sha256 /fd sha256 &quot;$(TargetPath)&quot;"
-          Condition=" '$(Configuration)' == 'Release' and '$(CertificateThumbprint)' != '' and Exists('$(TargetPath)')" />
+		<Exec Command="signtool.exe sign /sm /sha1 &quot;$(CertificateThumbprint)&quot; /tr &quot;$(TimestampServerUrl)&quot; /td sha256 /fd sha256 &quot;$(TargetPath)&quot;" Condition=" '$(Configuration)' == 'Release' and '$(CertificateThumbprint)' != '' and Exists('$(TargetPath)')" />
 	</Target>
 
 </Project>

@@ -195,6 +195,12 @@ public class AtlassianClient
 
                 try
                 {
+                    if (settings.RandomizeDelay)
+                    {
+                        var delay = Random.Shared.Next(settings.MinDelay, settings.MaxDelay);
+                        _logger.LogDebug("Throttling: Waiting {delay}ms before downloading plugin file...", delay);
+                        await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                    }
                     await DownloadPluginFile(versionDetail.Value.DownloadUrl, outputFile, settings, cancellationToken);
                 }
                 catch (Exception ex)
@@ -454,6 +460,12 @@ public class AtlassianClient
                     _logger.LogWarning("File \"{outputFile}\" already exists. Download skipped.", outputFile);
                     continue;
                 }
+                if (settings.RandomizeDelay)
+                {
+                    var delay = Random.Shared.Next(settings.MinDelay, settings.MaxDelay);
+                    _logger.LogDebug("Throttling: Waiting {delay}ms before next file...", delay);
+                    await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
+                }
                 await DownloadFile(file, outputFile, settings, cancellationToken);
             }
         }
@@ -516,7 +528,18 @@ public class AtlassianClient
                 }
                 else
                 {
-                    await Task.Delay(settings.DelayBetweenRetries, cancellationToken).ConfigureAwait(false);
+                    int delay;
+                    if (settings.RandomizeDelay)
+                    {
+                        delay = Random.Shared.Next(settings.MinDelay, settings.MaxDelay);
+                        _logger.LogDebug("Retry delay: Waiting random {delay}ms", delay);
+                    }
+                    else
+                    {
+                        delay = settings.DelayBetweenRetries;
+                    }
+
+                    await Task.Delay(delay, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

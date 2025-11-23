@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Microsoft.Extensions.Logging;
+using EpicMorg.Atlassian.Downloader.Core;
 
 internal class BellsAndWhistles
 {
@@ -16,6 +17,9 @@ internal class BellsAndWhistles
     private static readonly string assemblyVersion = entryAssembly.GetName().Version!.ToString();
 
     private static readonly string fileVersion = entryAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version;
+
+    private static readonly string coreVersion = typeof(AtlassianClient).Assembly
+    .GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "Unknown";
 
     private static readonly string assemblyName = entryAssembly.GetCustomAttribute<AssemblyProductAttribute>()!.Product;
     const string assemblyBuildType =
@@ -49,11 +53,11 @@ internal class BellsAndWhistles
         WriteColorLine("%║               ,ccccccccccc;.         !║    &GFX:     @stam                             !║     %║");
         WriteColorLine("%║          .... .:ccccccccccc;.        !╠══════════════════════════════════════════════╣     %║");
         WriteColorLine($"%║         .',,'..;cccccccccccc;.       !║    &Version: {fileVersion}                          !║     %║");
-        WriteColorLine("%║        .,,,,,'.';cccccccccccc;.      !║    &GitHub:  $EpicMorg/atlassian-downloader    !║     %║");
-        WriteColorLine("%║       .,;;;;;,'.':cccccccccccc;.     !╚══════════════════════════════════════════════╝     %║");
-        WriteColorLine("%║      .;:;;;;;;,...:cccccccccccc;.                                                         %║");
-        WriteColorLine("%║     .;:::::;;;;'. .;:ccccccccccc;.                                                        %║");
-        WriteColorLine("%║    .:cc::::::::,.  ..:ccccccccccc;.                                                       %║");
+        WriteColorLine($"%║        .,,,,,'.';cccccccccccc;.      !║    &Core:    {coreVersion}                          !║     %║");
+        WriteColorLine("%║       .,;;;;;,'.':cccccccccccc;.     !║     &GitHub:  $EpicMorg/atlassian-downloader   !║     %║");
+        WriteColorLine("%║      .;:;;;;;;,...:cccccccccccc;.    !╠══════════════════════════════════════════════╣     %║");
+        WriteColorLine($"%║     .;:::::;;;;'. .;:ccccccccccc;.   !║    &Runtime: {assemblyEnvironment}               !║     %║");
+        WriteColorLine("%║    .:cc::::::::,.  ..:ccccccccccc;.  !╚══════════════════════════════════════════════╝     %║");
         WriteColorLine("%║   .:cccccc:::::'     .:ccccccccccc;.                                                      %║");
         WriteColorLine("%║  .;:::::::::::,.      .;:::::::::::,.                                                     %║");
         WriteColorLine("%╠═╗ ............          ............                                                    %╔═╣");
