@@ -18,7 +18,7 @@ $ConsoleProjectFolder = "Atlassian.Downloader.Console"
 $ConsoleProjectFile = Join-Path $ConsoleProjectFolder "$ConsoleProjectName.csproj"
 
 $Configuration = "Release"
-$Framework = "net9.0"
+$Framework = "dotnet10.0"
 
 $sha1Thumbprint = "3BAA227AD0DBA8DB55D0EFA14B74AA56B689601D"  
 $sha256Fingerprint = "678456D26F89DF46A2AE8522825C157A6F9B937E890BBB5E6D51D1A2CBBD8702"
