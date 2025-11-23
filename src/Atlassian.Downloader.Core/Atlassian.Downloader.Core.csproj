@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
 
     <PackageId>EpicMorg.Atlassian.Downloader</PackageId>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.0.3</Version>
     <Authors>EpicMorg, kasthack, stam, EpicMorgDev</Authors>
     <Description>Core library for downloading Atlassian products and plugins.</Description>
     <PackageProjectUrl>https://github.com/EpicMorg/atlassian-downloader</PackageProjectUrl>
