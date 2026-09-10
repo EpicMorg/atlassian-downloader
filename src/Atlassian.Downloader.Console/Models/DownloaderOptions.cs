@@ -14,6 +14,7 @@ public record DownloaderOptions(
     int MaxRetries,
     int DelayBetweenRetries,
     string? PluginId,
+    bool RandomUserAgent,
     bool RandomDelay,
     int MinDelay,
     int MaxDelay

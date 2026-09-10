@@ -86,34 +86,43 @@ A feed that is unreachable or unparseable is logged and skipped; the remaining f
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-02.png)
 
 ```
+Description:
+  Atlassian archive downloader. See https://github.com/EpicMorg/atlassian-downloader for more info.
+
 Usage:
   atlassian-downloader [options]
 
 Options:
-  --action <Download|ListURLs|ListVersions|Plugin|ShowRawJson>  Action to perform [default: Download]
-  --output-dir <output-dir>                                     Output directory [default: current directory]
-  --plugin-id <plugin-id>                                       Marketplace plugin key. Required by "--action Plugin".
+  --action <Download|ListURLs|ListVersions|Plugin|ShowRawJson>  Action to perform. [default: Download]
+  --output-dir <output-dir>                                     Directory to download into. Defaults to the current
+                                                                directory. []
+  --plugin-id <plugin-id>                                       Marketplace plugin key. Required by "--action
+                                                                Plugin". []
   --product-version <product-version>                           Download only this version. Advice: use it together
-                                                                with "--custom-feed".
+                                                                with "--custom-feed". []
   --skip-file-check                                             Do not compare sizes of files that already exist
                                                                 locally; keep them as they are. [default: False]
-  --user-agent <user-agent>                                     Custom user agent [default: Mozilla/5.0 (Macintosh;
-                                                                Intel Mac OS X 10.15; rv:101.0) Gecko/20100101
-                                                                Firefox/101.0]
-  --max-retries <max-retries>                                   Attempts per file before giving up [default: 5]
-  --delay-between-retries <delay-between-retries>               Pause between attempts, ms [default: 2500]
+  --user-agent <user-agent>                                     User agent to send. Ignored when
+                                                                "--random-user-agent" is set. [default: Mozilla/5.0
+                                                                (Macintosh; Intel Mac OS X 10.15; rv:101.0)
+                                                                Gecko/20100101 Firefox/101.0]
+  --max-retries <max-retries>                                   Attempts per file before giving up. [default: 5]
+  --delay-between-retries <delay-between-retries>               Pause between attempts, in milliseconds. [default:
+                                                                2500]
   --custom-feed <custom-feed>                                   Feed URIs to use instead of the built-in list. Repeat
-                                                                the option to pass several.
-  --about                                                       Show credits banner [default: False]
-  --random-delay                                                Randomize the pause between downloads [default: False]
-  --min-delay <min-delay>                                       Lower bound for "--random-delay", ms [default: 300]
-  --max-delay <max-delay>                                       Upper bound for "--random-delay", ms [default: 10000]
+                                                                the option to pass several. []
+  --about                                                       Show credits banner. [default: False]
+  --random-user-agent                                           Pick a user agent at random instead of using
+                                                                "--user-agent". One is drawn per run. [default: False]
+  --random-delay                                                Randomize the pause between downloads, between
+                                                                "--min-delay" and "--max-delay". [default: False]
+  --min-delay <min-delay>                                       Lower bound for "--random-delay", in milliseconds.
+                                                                [default: 300]
+  --max-delay <max-delay>                                       Upper bound for "--random-delay", in milliseconds.
+                                                                [default: 10000]
   --version                                                     Show version information
   -?, -h, --help                                                Show help and usage information
 ```
-
-> `--random-user-agent` is also accepted on the command line, but it is currently wired to nothing:
-> the value never reaches the downloader, so it has no effect.
 
 ### Actions
 | Action | What it does |
@@ -164,12 +173,16 @@ bash# ./atlassian-downloader --action Plugin --plugin-id com.atlassian.jira.plug
 ```
 
 ### Go easy on the far side
-Useful for long unattended runs, when a steady stream of requests is likelier to get throttled:
+Useful for long unattended runs, when a steady stream of identical requests is likelier to get
+throttled:
 ```
 bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian" \
         --random-delay --min-delay 500 --max-delay 5000 \
+        --random-user-agent \
         --max-retries 10 --delay-between-retries 5000
 ```
+`--random-user-agent` draws one user agent per run from a built-in pool of Windows, macOS, Linux,
+Android and iOS strings, and overrides `--user-agent`.
 
 ## Additional settings
 File `src/Atlassian.Downloader.Console/appsettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file. It is copied next to the executable on build, so in a released build edit the `appsettings.json` sitting beside the binary.

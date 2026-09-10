@@ -26,6 +26,27 @@ public class AtlassianClient
         _logger = logger;
     }
 
+    /// <summary>
+    /// Puts the user agent on the shared client, honouring <see cref="DownloaderSettings.RandomUserAgent"/>.
+    /// </summary>
+    /// <remarks>
+    /// Clears before adding. ParseAdd appends, and every public entry point calls this on the same
+    /// injected HttpClient, so repeated calls used to build up a header carrying several user agents
+    /// at once.
+    /// </remarks>
+    private void ApplyUserAgent(DownloaderSettings settings)
+    {
+        var userAgent = settings.RandomUserAgent ? UserAgents.GetRandom() : settings.UserAgent;
+
+        if (settings.RandomUserAgent)
+        {
+            _logger.LogInformation("Using randomly picked user agent: {userAgent}", userAgent);
+        }
+
+        _client.DefaultRequestHeaders.UserAgent.Clear();
+        _client.DefaultRequestHeaders.UserAgent.ParseAdd(userAgent);
+    }
+
     #region Public API Methods
 
     public async Task DownloadPluginAsync(string pluginId, DownloaderSettings settings, CancellationToken cancellationToken = default)
@@ -36,7 +57,7 @@ public class AtlassianClient
         }
 
         _logger.LogInformation("Starting plugin archival for {pluginId}", pluginId);
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(settings.UserAgent);
+        ApplyUserAgent(settings);
 
         try
         {
@@ -71,7 +92,7 @@ public class AtlassianClient
 
     public async Task DownloadProductsAsync(DownloaderSettings settings, CancellationToken cancellationToken = default)
     {
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(settings.UserAgent);
+        ApplyUserAgent(settings);
         var feedUrls = GetFeedUrls(settings.CustomFeed);
         _logger.LogInformation("Product download task started.");
 
@@ -104,7 +125,7 @@ public class AtlassianClient
 
     public async Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetProductDataAsync(string feedUrl, DownloaderSettings settings, CancellationToken cancellationToken)
     {
-        _client.DefaultRequestHeaders.UserAgent.ParseAdd(settings.UserAgent);
+        ApplyUserAgent(settings);
         return await GetJson(feedUrl, settings.ProductVersion, cancellationToken);
     }
 

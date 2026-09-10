@@ -50,6 +50,7 @@ public class Worker : IHostedService
                 OutputDir = _options.OutputDir,
                 SkipFileCheck = _options.SkipFileCheck,
                 UserAgent = _options.UserAgent,
+                RandomUserAgent = _options.RandomUserAgent,
                 MaxRetries = _options.MaxRetries,
                 DelayBetweenRetries = _options.DelayBetweenRetries,
                 CustomFeed = _options.CustomFeed,

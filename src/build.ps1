@@ -8,6 +8,18 @@ param (
 
 # --- Configuration ---
 # All settings are in one place for easy updates.
+
+# $Configuration has to be set before anything is built out of it. It used to sit below, so
+# $CoreBinReleaseFolder was assembled from an empty value and pointed at the bin root rather than
+# bin\Release; only the -Recurse on the lookup further down kept that from being noticed.
+$Configuration = "Release"
+
+# The label that goes into the published archive names, NOT a target framework moniker. Every
+# release so far ships as atlassian-downloader-dotnet10.0-<rid>.zip, so it stays as it is; the real
+# moniker is $TargetFramework below.
+$ReleaseLabel = "dotnet10.0"
+$TargetFramework = "net10.0"
+
 $CoreProjectFolder = "Atlassian.Downloader.Core"
 $CoreProjectFile = Join-Path $CoreProjectFolder "Atlassian.Downloader.Core.csproj"
 $CoreBinReleaseFolder = Join-Path $CoreProjectFolder "bin" $Configuration
@@ -16,9 +28,6 @@ $CoreBinReleaseNugetFile = Join-Path $CoreBinReleaseFolder "*.nupkg"
 $ConsoleProjectName = "atlassian-downloader"
 $ConsoleProjectFolder = "Atlassian.Downloader.Console"
 $ConsoleProjectFile = Join-Path $ConsoleProjectFolder "$ConsoleProjectName.csproj"
-
-$Configuration = "Release"
-$Framework = "dotnet10.0"
 
 $sha1Thumbprint = "3BAA227AD0DBA8DB55D0EFA14B74AA56B689601D"  
 $sha256Fingerprint = "678456D26F89DF46A2AE8522825C157A6F9B937E890BBB5E6D51D1A2CBBD8702"
@@ -85,8 +94,8 @@ foreach ($rid in $runtimes) {
     Write-Host "Starting Standard Self-Contained build..." -ForegroundColor Cyan
     
     # MODIFIED: Paths are now absolute, constructed from the script's root location
-    $publishDir = Join-Path $PSScriptRoot $ConsoleProjectFolder "bin\$Configuration\$Framework\$rid\publish"
-    $archiveName = Join-Path $PSScriptRoot $ConsoleProjectFolder "bin\$ConsoleProjectName-$Framework-$rid.zip"
+    $publishDir = Join-Path $PSScriptRoot $ConsoleProjectFolder "bin\$Configuration\$TargetFramework\$rid\publish"
+    $archiveName = Join-Path $PSScriptRoot $ConsoleProjectFolder "bin\$ConsoleProjectName-$ReleaseLabel-$rid.zip"
     
     Invoke-Expression "dotnet publish $ConsoleProjectFile -c $Configuration --runtime $rid -p:SelfContained=true -p:PublishTrimmed=false -p:PublishAot=false -p:PublishSingleFile=false -o $publishDir --force"
     if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: dotnet publish failed for $rid." -ForegroundColor Red; continue }
@@ -106,8 +115,8 @@ foreach ($rid in $runtimes) {
     if ($Aot) {
         Write-Host "--------------------------------------------------"
         Write-Host "Starting Native AOT build..." -ForegroundColor Cyan
-        $publishDirAot = Join-Path $ConsoleProjectFolder "bin\$Configuration\$Framework\$rid\publish-aot"
-        $archiveNameAot = Join-Path $ConsoleProjectFolder "bin\$ConsoleProjectName-$Framework-$rid-aot.zip"
+        $publishDirAot = Join-Path $ConsoleProjectFolder "bin\$Configuration\$TargetFramework\$rid\publish-aot"
+        $archiveNameAot = Join-Path $ConsoleProjectFolder "bin\$ConsoleProjectName-$ReleaseLabel-$rid-aot.zip"
         
         Invoke-Expression "dotnet publish $ConsoleProjectFile -c $Configuration --runtime $rid -p:SelfContained=false -p:PublishTrimmed=false -p:PublishAot=true -p:PublishSingleFile=false -o $publishDirAot --force"
         if ($LASTEXITCODE -ne 0) { Write-Host "ERROR: dotnet publish (AOT) failed for $rid." -ForegroundColor Red; continue }
