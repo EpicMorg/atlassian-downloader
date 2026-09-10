@@ -50,6 +50,7 @@ public class Worker : IHostedService
                 OutputDir = _options.OutputDir,
                 SkipFileCheck = _options.SkipFileCheck,
                 UserAgent = _options.UserAgent,
+                RandomUserAgent = _options.RandomUserAgent,
                 MaxRetries = _options.MaxRetries,
                 DelayBetweenRetries = _options.DelayBetweenRetries,
                 CustomFeed = _options.CustomFeed,
@@ -80,25 +81,44 @@ public class Worker : IHostedService
                 case DownloadAction.ListVersions:
                 case DownloadAction.ShowRawJson:
                     var feedUrls = _atlassianClient.GetProductFeedUrls(settings);
+                    var failedFeeds = 0;
                     foreach (var feedUrl in feedUrls)
                     {
-                        var (json, versions) = await _atlassianClient.GetProductDataAsync(feedUrl, settings, cancellationToken);
+                        // Per feed, because the feeds are independent of one another. A single
+                        // unreachable host or unparseable document used to escape to the outer
+                        // catch below and end the run there, so every feed after it went unread
+                        // and the only trace was one line about an unhandled exception. Which
+                        // products survived came down to their position in the list.
+                        try
+                        {
+                            var (json, versions) = await _atlassianClient.GetProductDataAsync(feedUrl, settings, cancellationToken);
 
-                        if (_options.Action == DownloadAction.ShowRawJson)
-                        {
-                            Console.Out.WriteLine(json);
-                        }
-                        else if (_options.Action == DownloadAction.ListVersions)
-                        {
-                            foreach (var v in versions.Keys) Console.Out.WriteLine(v);
-                        }
-                        else if (_options.Action == DownloadAction.ListURLs)
-                        {
-                            foreach (var url in versions.SelectMany(v => v.Value).Select(f => f.ZipUrl))
+                            if (_options.Action == DownloadAction.ShowRawJson)
                             {
-                                if (url != null) Console.Out.WriteLine(url);
+                                Console.Out.WriteLine(json);
+                            }
+                            else if (_options.Action == DownloadAction.ListVersions)
+                            {
+                                foreach (var v in versions.Keys) Console.Out.WriteLine(v);
+                            }
+                            else if (_options.Action == DownloadAction.ListURLs)
+                            {
+                                foreach (var url in versions.SelectMany(v => v.Value).Select(f => f.ZipUrl))
+                                {
+                                    if (url != null) Console.Out.WriteLine(url);
+                                }
                             }
                         }
+                        catch (Exception ex) when (ex is not OperationCanceledException)
+                        {
+                            failedFeeds++;
+                            _logger.LogError(ex, "Feed {FeedUrl} failed and was skipped.", feedUrl);
+                        }
+                    }
+
+                    if (failedFeeds > 0)
+                    {
+                        _logger.LogWarning("{Failed} of {Total} feeds failed; the rest were processed.", failedFeeds, feedUrls.Count);
                     }
                     break;
             }

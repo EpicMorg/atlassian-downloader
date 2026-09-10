@@ -75,10 +75,19 @@ internal static class SourceInformation
             "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/stash.json",
             //"https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/eap/mesh.json",  //404
             
-            //https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json //unstable link with r\l
+            // SourceTree is the one product Atlassian publishes no feed for, so unlike everything
+            // above it has no my.atlassian.com source to fall back on: both entries per channel are
+            // mirrors, and losing them means losing the product.
+            //
+            // raw.githubusercontent.com is listed again alongside githack. It was commented out over
+            // an "unstable link with r\l", which was the old JSONP-wrapped output; the generator now
+            // emits a plain JSON array and the file parses from either host. Keeping only githack
+            // turned out to be the riskier half of that trade: its CDN kept serving a stale 0-byte
+            // sourcetree.json long after raw.githubusercontent.com had the corrected file.
+            "https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json",
             "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/archived/sourcetree.json",
-            
-            //https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json //unstable link with r\l
+
+            "https://raw.githubusercontent.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json",
             "https://raw.githack.com/EpicMorg/atlassian-json/master/json-backups/current/sourcetree.json"
 
         };

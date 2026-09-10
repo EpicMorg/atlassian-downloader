@@ -13,7 +13,7 @@ This library is the core engine for the [Atlassian Downloader](https://github.co
 
 Install the library via the NuGet package manager.
 
-```powershell
+```shell
 dotnet add package EpicMorg.Atlassian.Downloader
 ```
 
@@ -23,7 +23,7 @@ The primary entry point for the library is the AtlassianClient class. It's desig
 ### 1. Setup (Dependency Injection)
 In your Program.cs or startup configuration, register the AtlassianClient.
 
-```
+```csharp
 using EpicMorg.Atlassian.Downloader.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -43,7 +43,7 @@ var host = Host.CreateDefaultBuilder(args)
 ### 2. Creating Settings
 All download operations require a DownloaderSettings object to configure their behavior.
 
-```
+```csharp
 using EpicMorg.Atlassian.Downloader.Core.Models;
 
 var settings = new DownloaderSettings
@@ -52,7 +52,13 @@ var settings = new DownloaderSettings
     SkipFileCheck = false,
     MaxRetries = 5,
     DelayBetweenRetries = 3000,
-    UserAgent = "My-Awesome-App/1.0"
+    UserAgent = "My-Awesome-App/1.0",
+
+    // Optional throttling, for long unattended runs.
+    RandomUserAgent = false, // draw one at random per run, overriding UserAgent
+    RandomizeDelay = false,  // pause a random MinDelay..MaxDelay between downloads
+    MinDelay = 300,
+    MaxDelay = 10000
 };
 ```
 
@@ -68,7 +74,7 @@ Downloads all available Server/Data Center versions of a specific Marketplace pl
 
 #### Example:
 
-```
+```csharp
 using EpicMorg.Atlassian.Downloader.Core;
 using Microsoft.Extensions.DependencyInjection; // For GetRequiredService
 
@@ -90,22 +96,25 @@ catch (Exception ex)
 #### DownloadProductsAsync
 Downloads Atlassian products (like Jira, Confluence) from the official JSON data feeds.
 
+A feed that cannot be reached or parsed is logged and skipped, and the remaining feeds are still
+processed, so one broken source does not end the run.
+
 #### Signature:
 
-```
+```csharp
 Task DownloadProductsAsync(DownloaderSettings settings, CancellationToken cancellationToken = default)
 ```
 
 Example:
 You can specify ProductVersion and CustomFeed in the settings object to customize the download.
 
-```
+```csharp
 // Download a specific version of Confluence
 var confluenceSettings = new DownloaderSettings
 {
     OutputDir = "C:\\atlassian-archive",
     ProductVersion = "8.5.3",
-    CustomFeed = new Uri[] { new Uri("[https://my.atlassian.com/download/feeds/current/confluence.json](https://my.atlassian.com/download/feeds/current/confluence.json)") }
+    CustomFeed = new Uri[] { new Uri("https://my.atlassian.com/download/feeds/current/confluence.json") }
 };
 
 try
@@ -124,18 +133,18 @@ These are lower-level methods for more granular control, allowing you to fetch p
 
 #### Signatures:
 
-```
+```csharp
 IReadOnlyList<string> GetProductFeedUrls(DownloaderSettings settings);
 
 Task<(string json, IDictionary<string, ResponseItem[]> versions)> GetProductDataAsync(string feedUrl, DownloaderSettings settings, CancellationToken cancellationToken);
 ```
 Example: Listing all available Jira versions without downloading.
 
-```
+```csharp
 var jiraSettings = new DownloaderSettings 
 { 
     OutputDir = "C:\\atlassian-archive",
-    CustomFeed = new Uri[] { new Uri("[https://my.atlassian.com/download/feeds/current/jira-software.json](https://my.atlassian.com/download/feeds/current/jira-software.json)") }
+    CustomFeed = new Uri[] { new Uri("https://my.atlassian.com/download/feeds/current/jira-software.json") }
 };
 
 var jiraFeed = atlassianClient.GetProductFeedUrls(jiraSettings).First();

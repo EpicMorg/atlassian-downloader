@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
 
     <PackageId>EpicMorg.Atlassian.Downloader</PackageId>
-    <Version>1.0.0.3</Version>
+    <Version>1.0.0.4</Version>
     <Authors>EpicMorg, kasthack, stam, EpicMorgDev</Authors>
     <Description>Core library for downloading Atlassian products and plugins.</Description>
     <PackageProjectUrl>https://github.com/EpicMorg/atlassian-downloader</PackageProjectUrl>
@@ -24,8 +24,10 @@
     <Company>EpicMorg</Company>
     <Product>Atlassian Downloader</Product>
     <PackageIcon>favicon.png</PackageIcon>
-    <PackageLicenseExpression> MIT</PackageLicenseExpression>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <!-- MIT asks nothing of the consumer, so there is nothing to accept. Leaving this on made
+         NuGet prompt for license acceptance on install. -->
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
@@ -39,7 +41,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="favicon.ico" />
+    <!-- Pack="false": as a Content item this shipped into the package four times over, once under
+         content/ and once per target framework under contentFiles/, which is 436KB of a 1.1MB
+         package, and NuGet then copied it into every consuming project. The package icon is
+         favicon.png (PackageIcon above); this one only exists for ApplicationIcon, which a library
+         does not use anyway. -->
+    <Content Include="favicon.ico" Pack="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,9 +57,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-    <PackageReference Include="ReverseMarkdown" Version="4.7.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <PackageReference Include="ReverseMarkdown" Version="6.2.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,7 +69,10 @@
     </None>
   </ItemGroup>
 
-	<Target Name="SignLibraryOutput" AfterTargets="Build">
+	<!-- signtool.exe ships with the Windows SDK and exists nowhere else, so this target has to stay
+	     off other platforms. Without the guard a Release build on Linux or macOS died here with
+	     exit code 127 even though every assembly had already been produced. -->
+	<Target Name="SignLibraryOutput" AfterTargets="Build" Condition=" '$([MSBuild]::IsOSPlatform(Windows))' == 'true' ">
 		<PropertyGroup>
 			<CertificateThumbprint>3baa227ad0dba8db55d0efa14b74aa56b689601d</CertificateThumbprint>
 			<TimestampServerUrl>http://timestamp.digicert.com</TimestampServerUrl>
