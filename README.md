@@ -2,13 +2,22 @@
 
 # Atlassian Downloader
 
-Console app written with `c#` and `dotnet9` for downloading all avalible products from `Atlassian`. Why not?
+[![master](https://github.com/EpicMorg/atlassian-downloader/actions/workflows/dotnet-master.yml/badge.svg?branch=master)](https://github.com/EpicMorg/atlassian-downloader/actions/workflows/dotnet-master.yml) [![develop](https://github.com/EpicMorg/atlassian-downloader/actions/workflows/dotnet-develop.yml/badge.svg?branch=develop)](https://github.com/EpicMorg/atlassian-downloader/actions/workflows/dotnet-develop.yml) [![NuGet](https://img.shields.io/nuget/v/EpicMorg.Atlassian.Downloader?style=flat-square&label=nuget)](https://www.nuget.org/packages/EpicMorg.Atlassian.Downloader)
+
+Console app written with `c#` for downloading all avalible products from `Atlassian`. Why not?
+
+The console app (`atlassian-downloader`) targets `net10.0`. The reusable library behind it
+(`EpicMorg.Atlassian.Downloader`) multi-targets `net10.0`, `net9.0` and `net8.0`, so it can be
+referenced from older projects.
 
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-01.png)
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-03.png)
 
 # Supported OS: 
-`win-x86`, `win-x64`, `win-arm64`, `linux-x86`, `linux-x64`, `linux-musl-x64`, `linux-arm`, `linux-arm64`, `linux-bionic-x64`, `osx-x64`, `osx-arm64`
+`win-x86`, `win-x64`, `win-arm64`, `linux-x64`, `linux-musl-x64`, `linux-arm`, `linux-arm64`, `linux-bionic-x64`, `osx-x64`, `osx-arm64`
+
+These are the runtime identifiers `src/build.ps1` actually publishes. Code signing runs only on
+Windows, so a `Release` build on Linux or macOS produces unsigned but otherwise complete binaries.
 
 -------------------
 
@@ -26,8 +35,17 @@ Console app written with `c#` and `dotnet9` for downloading all avalible product
 ## ..build from scratch
 1. `git clone` this repo.
 2. `cd` to `<repo>/src`.
-3. execute `build.bat(sh)` in `src` folder.
-4. by default all data will be downloaded to `src/Atlassian` folder and subfolders.
+3. run `dotnet build` for a plain local build, or `dotnet build -c Release` for a release one.
+
+To reproduce a full release instead — the `Release` library, its NuGet package and a self-contained
+zip per runtime identifier — run `build.ps1` from the `src` folder:
+
+```
+PS> .\build.ps1          # all runtimes, self-contained
+PS> .\build.ps1 -Aot     # additionally produce Native AOT builds
+```
+
+`build.ps1` needs `PowerShell` and `7z` on `PATH`. Signing is skipped automatically off Windows.
 
 ## ..use binary versions
 1. just download latest [![Downloads](https://img.shields.io/github/downloads/EpicMorg/atlassian-downloader/total.svg?style=flat-square)](https://github.com/EpicMorg/atlassian-downloader/releases) [![Release](https://img.shields.io/github/v/release/EpicMorg/atlassian-downloader?style=flat-square)](https://github.com/EpicMorg/atlassian-downloader/releases)
@@ -39,6 +57,27 @@ Console app written with `c#` and `dotnet9` for downloading all avalible product
 | ------  | ------ | ------ 
 | :computer: `choco install atlassian-downloader` |  [![Version](https://img.shields.io/chocolatey/v/atlassian-downloader?label=version&style=for-the-badge)](https://chocolatey.org/packages/atlassian-downloader/) | [![Version](https://img.shields.io/chocolatey/dt/atlassian-downloader?style=for-the-badge)](https://chocolatey.org/packages/atlassian-downloader/) 
 
+## ..use it as a library
+The downloading logic lives in its own package, so it can be driven from your own code instead of
+the CLI:
+
+```
+dotnet add package EpicMorg.Atlassian.Downloader
+```
+
+```csharp
+var client = new AtlassianClient(httpClient, logger);
+var settings = new DownloaderSettings { OutputDir = "/mnt/nfs/atlassian" };
+
+// Every product feed.
+await client.DownloadProductsAsync(settings);
+
+// Or just read one without downloading anything.
+var (json, versions) = await client.GetProductDataAsync(feedUrl, settings, cancellationToken);
+```
+
+A feed that is unreachable or unparseable is logged and skipped; the remaining feeds still run.
+
 -------------------
 
 # Usage and settings
@@ -47,28 +86,46 @@ Console app written with `c#` and `dotnet9` for downloading all avalible product
 ![Atlassian Downloader](https://rawcdn.githack.com/EpicMorg/atlassian-downloader/28d17af55fbd4944d75f70d6bcb702e409820f64/.github/media/screenshot-02.png)
 
 ```
-atlassian-downloader:
-  Atlassian archive downloader. See https://github.com/EpicMorg/atlassian-downloader for more info
-
 Usage:
   atlassian-downloader [options]
 
 Options:
-  --output-dir <output-dir>                              Override output directory to download
-  --custom-feed <custom-feed>                            Override URIs to import []
-  --action <Download|ListURLs|ListVersions|ShowRawJson>  Action to perform [default: Download]
-  --about                                                Show credits banner [default: False]
-  --product-version <product-version>                    Override target version to download some product. Advice: Use
-                                                         it with "customFeed". []
-  --skip-file-check                                      Skip compare of file sizes if a local file already exists.
-                                                         Existing file will be skipped to check and redownload.
-                                                         [default: False]
-  --user-agent <user-agent>                              Set custom user agent via this feature flag. [default:
-                                                         Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0)
-                                                         Gecko/20100101 Firefox/101.0]
-  --version                                              Show version information
-  -?, -h, --help                                         Show help and usage information
+  --action <Download|ListURLs|ListVersions|Plugin|ShowRawJson>  Action to perform [default: Download]
+  --output-dir <output-dir>                                     Output directory [default: current directory]
+  --plugin-id <plugin-id>                                       Marketplace plugin key. Required by "--action Plugin".
+  --product-version <product-version>                           Download only this version. Advice: use it together
+                                                                with "--custom-feed".
+  --skip-file-check                                             Do not compare sizes of files that already exist
+                                                                locally; keep them as they are. [default: False]
+  --user-agent <user-agent>                                     Custom user agent [default: Mozilla/5.0 (Macintosh;
+                                                                Intel Mac OS X 10.15; rv:101.0) Gecko/20100101
+                                                                Firefox/101.0]
+  --max-retries <max-retries>                                   Attempts per file before giving up [default: 5]
+  --delay-between-retries <delay-between-retries>               Pause between attempts, ms [default: 2500]
+  --custom-feed <custom-feed>                                   Feed URIs to use instead of the built-in list. Repeat
+                                                                the option to pass several.
+  --about                                                       Show credits banner [default: False]
+  --random-delay                                                Randomize the pause between downloads [default: False]
+  --min-delay <min-delay>                                       Lower bound for "--random-delay", ms [default: 300]
+  --max-delay <max-delay>                                       Upper bound for "--random-delay", ms [default: 10000]
+  --version                                                     Show version information
+  -?, -h, --help                                                Show help and usage information
 ```
+
+> `--random-user-agent` is also accepted on the command line, but it is currently wired to nothing:
+> the value never reaches the downloader, so it has no effect.
+
+### Actions
+| Action | What it does |
+|--------|--------------|
+| `Download` | Downloads every file from every feed. The default. |
+| `ListURLs` | Prints download URLs only, downloads nothing. |
+| `ListVersions` | Prints the version numbers found in the feeds. |
+| `ShowRawJson` | Prints each feed verbatim, as fetched. |
+| `Plugin` | Archives every version of one Marketplace plugin. Needs `--plugin-id`. |
+
+A feed that cannot be fetched or parsed is reported and skipped, and the run continues with the
+remaining feeds.
 
 ## Example of usage:
 
@@ -88,8 +145,9 @@ bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian" --custom-feed htt
 ```
 
 ### cron or crontab example
+Every Sunday at 00:00:
 ``` 
-0 0 * 1 0 /opt/epicmorg/atlassian-downloader/atlassian-downloader  --output-dir "/mnt/nfs/atlassian"
+0 0 * * 0 /opt/epicmorg/atlassian-downloader/atlassian-downloader --output-dir "/mnt/nfs/atlassian"
 ```
 ### Show only urls from jsons
 ```
@@ -98,8 +156,23 @@ or
 bash# ./atlassian-downloader --action ListURLs
 ```
 
+### Archive all versions of a Marketplace plugin
+```
+PS> .\atlassian-downloader.exe --action Plugin --plugin-id com.atlassian.jira.plugin.system.issuetabpanels
+or
+bash# ./atlassian-downloader --action Plugin --plugin-id com.atlassian.jira.plugin.system.issuetabpanels
+```
+
+### Go easy on the far side
+Useful for long unattended runs, when a steady stream of requests is likelier to get throttled:
+```
+bash# ./atlassian-downloader --output-dir "/mnt/nfs/atlassian" \
+        --random-delay --min-delay 500 --max-delay 5000 \
+        --max-retries 10 --delay-between-retries 5000
+```
+
 ## Additional settings
-File `src/appSettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file.
+File `src/Atlassian.Downloader.Console/appsettings.json` contains additional settings, like [loglevel](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.loglevel?view=dotnet-plat-ext-5.0#fields) and [console output theme](https://github.com/serilog/serilog-sinks-console). You can set it up via editing this file. It is copied next to the executable on build, so in a released build edit the `appsettings.json` sitting beside the binary.
 
 ### Supported log levels
 | Level | Enum | Description
@@ -142,6 +215,15 @@ The following built-in themes are available, provided by `Serilog.Sinks.Console`
 | [![Product](https://img.shields.io/static/v1?label=Atlassian&message=SourceTree&color=bright%20green&style=for-the-badge)](https://www.atlassian.com/software/sourcetree) | :white_check_mark: | :white_check_mark: | :x: |
 
 * Archive of `Atlassian` jsons available [here](https://github.com/EpicMorg/atlassian-json).
+
+Every product above is read from two sources: the official `my.atlassian.com` feed and a mirror of
+it in [atlassian-json](https://github.com/EpicMorg/atlassian-json), so one of them being down does
+not cost you the product.
+
+`SourceTree` is the exception. `Atlassian` publishes no feed for it at all, so its data is scraped
+off the product pages into `atlassian-json` and read back from there — from both
+`raw.githubusercontent.com` and `raw.githack.com`, since the two have been seen serving different
+content for days at a time.
 
 -------------------
 

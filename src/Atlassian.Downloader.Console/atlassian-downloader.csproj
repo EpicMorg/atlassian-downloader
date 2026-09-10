@@ -32,7 +32,9 @@
     </None>
   </ItemGroup>
 
-	<Target Name="SignBuildOutput" AfterTargets="Build">
+	<!-- Windows-only: signtool.exe comes from the Windows SDK. A Release build on any other platform
+	     used to fail here with exit code 127 after everything had already compiled. -->
+	<Target Name="SignBuildOutput" AfterTargets="Build" Condition=" '$([MSBuild]::IsOSPlatform(Windows))' == 'true' ">
 		<PropertyGroup>
 			<CertificateThumbprint>3BAA227AD0DBA8DB55D0EFA14B74AA56B689601D</CertificateThumbprint>
 			<TimestampServerUrl>http://timestamp.digicert.com</TimestampServerUrl>
@@ -44,7 +46,7 @@
 		<Exec Command="signtool.exe sign /sm /sha1 &quot;$(CertificateThumbprint)&quot; /tr &quot;$(TimestampServerUrl)&quot; /td sha256 /fd sha256 &quot;$(FileToSign)&quot;" Condition=" '$(Configuration)' == 'Release' and Exists('$(FileToSign)')" />
 	</Target>
 
-	<Target Name="SignPublishOutput" AfterTargets="Publish">
+	<Target Name="SignPublishOutput" AfterTargets="Publish" Condition=" '$([MSBuild]::IsOSPlatform(Windows))' == 'true' ">
 		<PropertyGroup>
 			<CertificateThumbprint>3BAA227AD0DBA8DB55D0EFA14B74AA56B689601D</CertificateThumbprint>
 			<TimestampServerUrl>http://timestamp.digicert.com</TimestampServerUrl>

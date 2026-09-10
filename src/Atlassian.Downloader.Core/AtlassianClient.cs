@@ -75,11 +75,30 @@ public class AtlassianClient
         var feedUrls = GetFeedUrls(settings.CustomFeed);
         _logger.LogInformation("Product download task started.");
 
+        var failedFeeds = 0;
+
         foreach (var feedUrl in feedUrls)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var (_, versions) = await GetJson(feedUrl, settings.ProductVersion, cancellationToken);
-            await DownloadFilesFromFeed(feedUrl, versions, settings, cancellationToken);
+
+            // One broken feed must not cost us the others. This loop covers every product, so an
+            // exception here used to abandon the whole mirror part-way through, and which products
+            // survived depended on nothing but their position in the list.
+            try
+            {
+                var (_, versions) = await GetJson(feedUrl, settings.ProductVersion, cancellationToken);
+                await DownloadFilesFromFeed(feedUrl, versions, settings, cancellationToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                failedFeeds++;
+                _logger.LogError(ex, "Feed {FeedUrl} failed and was skipped.", feedUrl);
+            }
+        }
+
+        if (failedFeeds > 0)
+        {
+            _logger.LogWarning("{Failed} of {Total} feeds failed; the rest were downloaded.", failedFeeds, feedUrls.Count);
         }
     }
 

@@ -4,44 +4,66 @@ on:
   pull_request:
     branches:
       - '*'
-    tags:
-      - '*'
   push:
     branches:
       - 'develop'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: develop-${{ github.ref }}
+  # Superseded pushes to a branch or PR are not worth finishing.
+  cancel-in-progress: true
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Both, because the app targets Linux and macOS runtimes as well as Windows. Building on
+        # Linux is also what catches Windows-only build steps leaking out of their guards, which is
+        # how the signtool.exe target used to break release builds everywhere but Windows.
+        os: [ubuntu-24.04, windows-latest]
 
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8
-        dotnet-quality: 'preview'
+      - uses: actions/checkout@v7
 
-    - name: Restore
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: true
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-      run: |
-        cd src
-        dotnet restore
+      # All three, not just one: the console app targets net10.0 while the Core library still
+      # multi-targets net10.0;net9.0;net8.0. Pinning this to 8 is what made every run since
+      # 2025-11-23 fail with "The current .NET SDK does not support targeting .NET 10.0".
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
 
-    - name: Build
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: true
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-      run:  |
-        cd src
-        dotnet build --no-restore
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ matrix.os }}-${{ hashFiles('src/**/*.csproj') }}
+          restore-keys: nuget-${{ matrix.os }}-
 
-    - name: Test
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: true
-        DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-      run:  |
-        cd src
-        dotnet test --no-build --verbosity normal
+      - name: Restore
+        run: dotnet restore
+        working-directory: src
+
+      - name: Build
+        run: dotnet build --no-restore
+        working-directory: src
+
+      # A no-op today: the solution holds no test project, so this finds nothing and passes. Left in
+      # place so that it starts covering them the moment one is added.
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+        working-directory: src

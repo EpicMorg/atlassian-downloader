@@ -1,5 +1,15 @@
 # Atlassian Downloader - Changelog
 
+## Library `EpicMorg.Atlassian.Downloader`
+
+Versioned on its own since `2.0.0.5`, when the core logic was split out of the console app. The
+`1.x` section further down is the old history of the app itself, not of this package.
+
+* `1.0.0.4` - fixes:
+    * a feed that cannot be reached or parsed is now logged and skipped instead of ending the run. Previously the first bad feed aborted everything after it, so which products got mirrored depended on their position in the list.
+    * restored `raw.githubusercontent.com` alongside `raw.githack.com` for the `SourceTree` mirrors. `SourceTree` is the one product with no official feed, and the two hosts have been seen serving different content for days at a time.
+    * code signing is skipped off Windows instead of failing the build. `signtool.exe` ships with the Windows SDK, so a `Release` build on Linux or macOS died with exit code 127 after everything had already compiled.
+
 ## 2.x
 
 * `2.0.0.8` - technical update:
